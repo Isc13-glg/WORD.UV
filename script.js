@@ -10,7 +10,7 @@ const search = document.getElementById("search");
 let map;
 let audioUnlocked = false;
 
-// 🌍 Cities (alphabetical incl. Paphos)
+// 🌍 Cities
 const cities = [
   "Amsterdam","Athens","Berlin","Brussels","Bucharest",
   "Budapest","Copenhagen","Dublin","Helsinki","Kyiv",
@@ -29,7 +29,7 @@ function renderCities(list = cities) {
 
 renderCities();
 
-// 🔎 search filter
+// 🔎 search
 search?.addEventListener("input", (e) => {
   const filtered = cities.filter(c =>
     c.toLowerCase().includes(e.target.value.toLowerCase())
@@ -46,8 +46,18 @@ function getMessage(uv) {
   return "☠️ CRITICAL DANGER.";
 }
 
-// 🎤 VOICE SYSTEM
+//
+// 🎤 FIXED iPhone + ALL BROWSERS VOICE
+//
 function speakUV(uv) {
+
+  if (!("speechSynthesis" in window)) return;
+
+  // IMPORTANT FIX FOR iOS: cancel + resume
+  window.speechSynthesis.cancel();
+
+  const msg = new SpeechSynthesisUtterance();
+
   let text = `UV index is ${uv}.`;
 
   if (uv <= 2) text += " Low risk.";
@@ -56,14 +66,17 @@ function speakUV(uv) {
   else if (uv <= 10) text += " Extreme UV detected.";
   else text += " Critical danger level.";
 
-  const speech = new SpeechSynthesisUtterance(text);
-  speech.lang = "en-US";
-  speech.rate = 1;
+  msg.text = text;
+  msg.lang = "en-US";
+  msg.rate = 1;
 
-  window.speechSynthesis.speak(speech);
+  // 🔥 iPhone FIX: small delay helps Safari actually speak
+  setTimeout(() => {
+    window.speechSynthesis.speak(msg);
+  }, 150);
 }
 
-// 🔊 ALARM (FIXED FOR MOBILE)
+// 🔊 alarm
 function playAlarm(uv) {
   if (uv >= 7 && audioUnlocked) {
     alarm.currentTime = 0;
@@ -71,12 +84,19 @@ function playAlarm(uv) {
   }
 }
 
-// 🗺️ MAP (Chrome + Safari FIXED)
+// 📳 vibration (Android only)
+function vibratePhone(uv) {
+  if (!("vibrate" in navigator)) return;
+
+  if (uv >= 7) {
+    navigator.vibrate([200, 100, 200, 100, 500]);
+  }
+}
+
+// 🗺️ map
 function initMap(lat, lon) {
 
-  if (map) {
-    map.remove();
-  }
+  if (map) map.remove();
 
   map = L.map("map").setView([lat, lon], 13);
 
@@ -94,19 +114,24 @@ function initMap(lat, lon) {
   }, 300);
 }
 
-// 🚀 START SCAN BUTTON
+// 🚀 START BUTTON
 startBtn.addEventListener("click", () => {
 
-  statusText.textContent = "Unlocking sensors...";
+  statusText.textContent = "Activating system...";
 
-  // 🔓 IMPORTANT: unlock audio for mobile
+  // 🔓 unlock audio (CRITICAL FOR iPHONE)
   audioUnlocked = true;
 
-  // trick browsers into enabling sound
+  // force audio permission unlock
   alarm.play().then(() => {
     alarm.pause();
     alarm.currentTime = 0;
   }).catch(() => {});
+
+  // also unlock speech on iOS
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.cancel();
+  }
 
   navigator.geolocation.getCurrentPosition(async (pos) => {
 
@@ -127,8 +152,11 @@ startBtn.addEventListener("click", () => {
     message.textContent = getMessage(uv);
 
     initMap(lat, lon);
-    speakUV(uv);
+
+    // 🔥 ALL ALERT SYSTEMS
+    speakUV(uv);       // FIXED iPhone speech
     playAlarm(uv);
+    vibratePhone(uv);
 
   }, () => {
     statusText.textContent = "Location permission denied.";
