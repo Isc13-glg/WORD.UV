@@ -38,17 +38,17 @@ search?.addEventListener("input", (e) => {
 function getMsg(uv) {
   if (uv <= 2) return "🧊 Safe zone. Κυριακή Ανδρέου μπορεί να κυκλοφορεί.";
   if (uv <= 5) return "😎 Moderate UV. Βάλε λίγο αντηλιακό.";
-  if (uv <= 7) return "☀️ Προσοχή. Ο ήλιος δεν αστειεύεται.";
+  if (uv <= 7) return "☀️ Προσοχή. Ο ήλιος είναι δυνατός.";
   if (uv <= 10) return "🔥 EXTREME UV — ΜΗΝ ΠΑΣ ΕΞΩ.";
   return "☠️ ΚΡΙΣΙΜΟ ΕΠΙΠΕΔΟ — SYSTEM ALERT";
 }
 
-// 🔊 alarm
+// 🔊 alarm sound
 function playAlarm() {
-  alarm.play().catch(()=>{});
+  alarm.play().catch(() => {});
 }
 
-// 🗺️ MAP + MOVING DANGER ZONE
+// 🗺️ MAP
 let map;
 let dangerCircle;
 
@@ -62,11 +62,11 @@ function initMap(lat, lon, uv) {
 
   L.marker([lat, lon])
     .addTo(map)
-    .bindPopup("📍 You are here (UV monitored zone)")
+    .bindPopup("📍 You are here")
     .openPopup();
 
-  // 🔴 DANGER ZONE OVERLAY (PULSING CIRCLE)
-  let radius = uv * 200; // UV controls danger radius
+  // 🔴 MOVING DANGER ZONE
+  let radius = uv * 200;
 
   dangerCircle = L.circle([lat, lon], {
     radius: radius,
@@ -75,28 +75,31 @@ function initMap(lat, lon, uv) {
     fillOpacity: 0.25
   }).addTo(map);
 
-  // 🔥 ANIMATION (pulsing effect)
   let grow = true;
 
   setInterval(() => {
     if (!dangerCircle) return;
 
-    let current = dangerCircle.getRadius();
+    let r = dangerCircle.getRadius();
 
     if (grow) {
-      current += 40;
-      if (current > uv * 400) grow = false;
+      r += 50;
+      if (r > uv * 450) grow = false;
     } else {
-      current -= 40;
-      if (current < uv * 150) grow = true;
+      r -= 50;
+      if (r < uv * 150) grow = true;
     }
 
-    dangerCircle.setRadius(current);
-
+    dangerCircle.setRadius(r);
   }, 120);
+
+  // 🔥 FIX CHROME/SAFARI MAP RENDER ISSUE
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 300);
 }
 
-// 🚀 START SYSTEM (works on Safari + Chrome iPhone/Android)
+// 🚀 START BUTTON (SAFE FOR CHROME + SAFARI + iPHONE)
 startBtn.addEventListener("click", () => {
 
   status.textContent = "Scanning location...";
@@ -128,7 +131,6 @@ startBtn.addEventListener("click", () => {
 
     },
     (err) => {
-      console.log(err);
       status.textContent = "❌ Enable location permissions in browser settings.";
     },
     {
