@@ -10,7 +10,7 @@ const search = document.getElementById("search");
 let map;
 let audioUnlocked = false;
 
-// 🌍 Cities
+// 🌍 Europe cities
 const cities = [
   "Amsterdam","Athens","Berlin","Brussels","Bucharest",
   "Budapest","Copenhagen","Dublin","Helsinki","Kyiv",
@@ -37,7 +37,7 @@ search?.addEventListener("input", (e) => {
   renderCities(filtered);
 });
 
-// ☀️ UV text
+// ☀️ UV message
 function getMessage(uv) {
   if (uv <= 2) return "🧊 Safe UV level.";
   if (uv <= 5) return "😎 Moderate UV.";
@@ -46,7 +46,7 @@ function getMessage(uv) {
   return "☠️ CRITICAL DANGER.";
 }
 
-// 🎤 FIXED iPhone voice
+// 🎤 FIXED iPHONE VOICE
 function speakUV(uv) {
   if (!("speechSynthesis" in window)) return;
 
@@ -69,7 +69,7 @@ function speakUV(uv) {
   }, 150);
 }
 
-// 🔊 alarm
+// 🔊 alarm (mobile safe)
 function playAlarm(uv) {
   if (uv >= 7 && audioUnlocked) {
     alarm.currentTime = 0;
@@ -77,10 +77,12 @@ function playAlarm(uv) {
   }
 }
 
-// 🗺️ map fix
+// 🗺️ MAP FIX (Safari + Chrome safe)
 function initMap(lat, lon) {
 
-  if (map) map.remove();
+  if (map) {
+    map.remove();
+  }
 
   map = L.map("map").setView([lat, lon], 13);
 
@@ -98,44 +100,70 @@ function initMap(lat, lon) {
   }, 300);
 }
 
-// 🚀 START (FIXED FLOW — NO STUCK STATUS)
+// 🚀 START BUTTON (iPHONE SAFE — NO FREEZE)
 startBtn.addEventListener("click", () => {
 
   statusText.textContent = "Activating system...";
 
   audioUnlocked = true;
 
-  // unlock audio for mobile
+  // 🔓 unlock audio on iOS
   alarm.play().then(() => {
     alarm.pause();
     alarm.currentTime = 0;
   }).catch(() => {});
 
+  // ⏱️ SAFETY: prevents infinite loading on iPhone
+  let failSafe = setTimeout(() => {
+    statusText.textContent = "System delay — try again.";
+  }, 8000);
+
   navigator.geolocation.getCurrentPosition(async (pos) => {
+
+    clearTimeout(failSafe);
 
     const lat = pos.coords.latitude;
     const lon = pos.coords.longitude;
 
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=uv_index_max&timezone=auto`;
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=uv_index_max&timezone=auto`;
 
-    const res = await fetch(url);
-    const data = await res.json();
+      const res = await fetch(url);
+      const data = await res.json();
 
-    const uv = data.daily.uv_index_max[0];
+      const uv = data?.daily?.uv_index_max?.[0] ?? 0;
 
-    // ✅ FIX: UI always continues (no stuck loading)
-    statusText.style.display = "none";
-    result.classList.remove("hidden");
+      // ✅ ALWAYS UPDATE UI (iPHONE FIX)
+      requestAnimationFrame(() => {
 
-    uvValue.textContent = `UV INDEX: ${uv}`;
-    message.textContent = getMessage(uv);
+        statusText.style.display = "none";
+        result.classList.remove("hidden");
 
-    initMap(lat, lon);
-    speakUV(uv);
-    playAlarm(uv);
+        uvValue.textContent = `UV INDEX: ${uv}`;
+        message.textContent = getMessage(uv);
+
+        initMap(lat, lon);
+
+        speakUV(uv);
+        playAlarm(uv);
+
+      });
+
+    } catch (e) {
+      statusText.textContent = "UV fetch failed — retry.";
+    }
 
   }, () => {
-    statusText.textContent = "Location permission denied.";
+
+    clearTimeout(failSafe);
+
+    statusText.textContent =
+      "Location permission denied — enable Safari location.";
+
+  }, {
+    enableHighAccuracy: true,
+    timeout: 10000,
+    maximumAge: 0
   });
 
 });
