@@ -3,66 +3,33 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>EU Emergency Control Center</title>
+<title>EU UV Monitoring System</title>
 
 <link rel="stylesheet" href="style.css"/>
-
-<!-- Leaflet Map -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 
 <body>
 
-<!-- TOP EMERGENCY BAR -->
 <div class="topbar">
-  🚨 EU EMERGENCY CONTROL CENTER — LIVE SOLAR MONITORING SYSTEM
+  🚨 EUROPEAN UV MONITORING SYSTEM — CLASSIFIED ALERT 🚨
 </div>
 
 <div class="container">
 
-  <div class="grid">
+  <h2 class="user">User: Σκαπούλη Πετρούλλα</h2>
 
-    <!-- LEFT PANEL -->
-    <div class="panel">
+  <div class="card">
 
-      <h2>📡 Radar System</h2>
+    <h1>🌞 UV Level Scanner</h1>
 
-      <div class="radar">
-        <div class="scan"></div>
-      </div>
+    <p id="status">Press start to begin scan...</p>
 
-      <h3 id="threatLevel">THREAT LEVEL: INITIALIZING</h3>
+    <button id="startBtn">START SCAN</button>
 
-      <p id="status">Waiting for activation...</p>
+    <div id="result" class="hidden">
 
-      <button id="startBtn">START LIVE SCAN</button>
-
-      <audio id="alarm">
-        <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
-      </audio>
-
-    </div>
-
-    <!-- CENTER PANEL (MAP) -->
-    <div class="panel">
-
-      <h2>🗺️ Live UV Surveillance Map</h2>
-
-      <div id="map"></div>
-
-    </div>
-
-    <!-- RIGHT PANEL -->
-    <div class="panel">
-
-      <h2>⚠️ System Alerts</h2>
-
-      <p id="warning">No active solar threats detected</p>
-
-      <h3>🌍 European Monitoring Grid</h3>
-
-      <ul id="cityList"></ul>
+      <h2 id="uvValue"></h2>
+      <p id="message"></p>
 
     </div>
 
