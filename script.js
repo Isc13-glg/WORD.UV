@@ -10,7 +10,7 @@ const search = document.getElementById("search");
 let map;
 let audioUnlocked = false;
 
-// 🌍 Europe cities
+// 🌍 Cities
 const cities = [
   "Amsterdam","Athens","Berlin","Brussels","Bucharest",
   "Budapest","Copenhagen","Dublin","Helsinki","Kyiv",
@@ -37,7 +37,7 @@ search?.addEventListener("input", (e) => {
   renderCities(filtered);
 });
 
-// ☀️ UV message
+// ☀️ UV message text
 function getMessage(uv) {
   if (uv <= 2) return "🧊 Safe UV level.";
   if (uv <= 5) return "😎 Moderate UV.";
@@ -46,8 +46,9 @@ function getMessage(uv) {
   return "☠️ CRITICAL DANGER.";
 }
 
-// 🎤 FIXED iPHONE VOICE
+// 🎤 FIXED iPHONE SPEECH (MOST IMPORTANT PART)
 function speakUV(uv) {
+
   if (!("speechSynthesis" in window)) return;
 
   window.speechSynthesis.cancel();
@@ -63,13 +64,13 @@ function speakUV(uv) {
   const msg = new SpeechSynthesisUtterance(text);
   msg.lang = "en-US";
   msg.rate = 1;
+  msg.pitch = 1;
 
-  setTimeout(() => {
-    window.speechSynthesis.speak(msg);
-  }, 150);
+  // 🔥 iPhone SAFARI FIX: speak immediately inside user action flow
+  window.speechSynthesis.speak(msg);
 }
 
-// 🔊 alarm (mobile safe)
+// 🔊 ALARM
 function playAlarm(uv) {
   if (uv >= 7 && audioUnlocked) {
     alarm.currentTime = 0;
@@ -77,12 +78,10 @@ function playAlarm(uv) {
   }
 }
 
-// 🗺️ MAP FIX (Safari + Chrome safe)
+// 🗺️ MAP SAFE FOR ALL BROWSERS
 function initMap(lat, lon) {
 
-  if (map) {
-    map.remove();
-  }
+  if (map) map.remove();
 
   map = L.map("map").setView([lat, lon], 13);
 
@@ -100,70 +99,53 @@ function initMap(lat, lon) {
   }, 300);
 }
 
-// 🚀 START BUTTON (iPHONE SAFE — NO FREEZE)
+// 🚀 START SCAN (CRITICAL ORDER FIX FOR iPHONE)
 startBtn.addEventListener("click", () => {
 
   statusText.textContent = "Activating system...";
 
   audioUnlocked = true;
 
-  // 🔓 unlock audio on iOS
+  // 🔓 unlock audio system (iPhone requirement)
   alarm.play().then(() => {
     alarm.pause();
     alarm.currentTime = 0;
   }).catch(() => {});
 
-  // ⏱️ SAFETY: prevents infinite loading on iPhone
-  let failSafe = setTimeout(() => {
-    statusText.textContent = "System delay — try again.";
-  }, 8000);
-
   navigator.geolocation.getCurrentPosition(async (pos) => {
-
-    clearTimeout(failSafe);
 
     const lat = pos.coords.latitude;
     const lon = pos.coords.longitude;
 
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=uv_index_max&timezone=auto`;
+
     try {
-      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=uv_index_max&timezone=auto`;
 
       const res = await fetch(url);
       const data = await res.json();
 
       const uv = data?.daily?.uv_index_max?.[0] ?? 0;
 
-      // ✅ ALWAYS UPDATE UI (iPHONE FIX)
-      requestAnimationFrame(() => {
+      // ✅ UI update
+      statusText.style.display = "none";
+      result.classList.remove("hidden");
 
-        statusText.style.display = "none";
-        result.classList.remove("hidden");
+      uvValue.textContent = `UV INDEX: ${uv}`;
+      message.textContent = getMessage(uv);
 
-        uvValue.textContent = `UV INDEX: ${uv}`;
-        message.textContent = getMessage(uv);
+      initMap(lat, lon);
 
-        initMap(lat, lon);
+      // 🔥 IMPORTANT: SPEECH MUST RUN IMMEDIATELY
+      speakUV(uv);
 
-        speakUV(uv);
-        playAlarm(uv);
-
-      });
+      playAlarm(uv);
 
     } catch (e) {
-      statusText.textContent = "UV fetch failed — retry.";
+      statusText.textContent = "UV system failed — retry.";
     }
 
   }, () => {
-
-    clearTimeout(failSafe);
-
-    statusText.textContent =
-      "Location permission denied — enable Safari location.";
-
-  }, {
-    enableHighAccuracy: true,
-    timeout: 10000,
-    maximumAge: 0
+    statusText.textContent = "Location permission denied.";
   });
 
 });
