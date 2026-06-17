@@ -17,7 +17,7 @@ body {
 }
 
 button {
-  padding: 12px;
+  padding: 12px 18px;
   background: #00ffcc;
   border: none;
   border-radius: 8px;
@@ -25,6 +25,15 @@ button {
 
 .hidden {
   display: none;
+}
+
+.top-day {
+  background: #1b2a4a;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 8px;
+  color: #00ffcc;
+  font-weight: bold;
 }
 
 #map {
@@ -43,14 +52,4 @@ input {
 ul {
   list-style: none;
   padding: 0;
-  max-height: 250px;
-  overflow-y: auto;
-}
-
-li {
-  background: #1b2a4a;
-  margin: 5px;
-  padding: 8px;
-  border-radius: 6px;
-  cursor: pointer;
 }
