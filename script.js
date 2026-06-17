@@ -47,7 +47,7 @@ function getMessage(uv) {
   return "☠️ CRITICAL DANGER.";
 }
 
-// 🎤 iPhone-safe voice
+// 🎤 voice (PC + iPhone safe)
 function speakUV(uv) {
   if (!("speechSynthesis" in window)) return;
 
@@ -68,7 +68,19 @@ function speakUV(uv) {
   window.speechSynthesis.speak(msg);
 }
 
-// 🔊 alarm (ONLY ≥ 6.5)
+// 🔊 sound fix
+function unlockAudio() {
+  alarm.volume = 1;
+
+  alarm.play()
+    .then(() => {
+      alarm.pause();
+      alarm.currentTime = 0;
+    })
+    .catch(() => {});
+}
+
+// 🔊 alarm only ≥ 6.5
 function playAlarm(uv) {
   if (uv >= 6.5 && audioUnlocked) {
     alarm.currentTime = 0;
@@ -76,38 +88,41 @@ function playAlarm(uv) {
   }
 }
 
-// 🗺️ map
+// 🗺️ SAFE MAP INIT
 function initMap(lat, lon) {
 
-  if (map) map.remove();
-
-  map = L.map("map").setView([lat, lon], 13);
-
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap"
-  }).addTo(map);
-
-  L.marker([lat, lon])
-    .addTo(map)
-    .bindPopup("📍 You are here")
-    .openPopup();
-
   setTimeout(() => {
-    map.invalidateSize();
-  }, 300);
+
+    if (map) {
+      map.remove();
+      map = null;
+    }
+
+    map = L.map("map").setView([lat, lon], 13);
+
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap"
+    }).addTo(map);
+
+    L.marker([lat, lon])
+      .addTo(map)
+      .bindPopup("📍 You are here")
+      .openPopup();
+
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 300);
+
+  }, 200);
 }
 
-// 🚀 START SCAN
+// 🚀 START SCAN (FULL FIXED FLOW)
 startBtn.addEventListener("click", () => {
 
   statusText.textContent = "Activating system...";
 
   audioUnlocked = true;
-
-  alarm.play().then(() => {
-    alarm.pause();
-    alarm.currentTime = 0;
-  }).catch(() => {});
+  unlockAudio();
 
   navigator.geolocation.getCurrentPosition(async (pos) => {
 
@@ -129,15 +144,17 @@ startBtn.addEventListener("click", () => {
 
       const uv = values[index] ?? 0;
 
-      // UI update
+      // UI
       statusText.style.display = "none";
       result.classList.remove("hidden");
 
       uvValue.textContent = `UV INDEX (NOW): ${uv}`;
       message.textContent = getMessage(uv);
 
-      // ☀️ TOP OF DAY TEXT
-      topOfDay.textContent = `☀️ Today's peak UV in your area is ${uv}`;
+      // ☀️ TOP OF DAY FIXED
+      if (topOfDay) {
+        topOfDay.textContent = `☀️ Today's peak UV in your area is ${uv}`;
+      }
 
       initMap(lat, lon);
       speakUV(uv);
