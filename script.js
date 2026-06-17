@@ -47,7 +47,7 @@ function getMessage(uv) {
   return "☠️ CRITICAL DANGER.";
 }
 
-// 🎤 voice (PC + iPhone safe)
+// 🎤 voice
 function speakUV(uv) {
   if (!("speechSynthesis" in window)) return;
 
@@ -68,19 +68,7 @@ function speakUV(uv) {
   window.speechSynthesis.speak(msg);
 }
 
-// 🔊 sound fix
-function unlockAudio() {
-  alarm.volume = 1;
-
-  alarm.play()
-    .then(() => {
-      alarm.pause();
-      alarm.currentTime = 0;
-    })
-    .catch(() => {});
-}
-
-// 🔊 alarm only ≥ 6.5
+// 🔊 alarm ≥ 6.5
 function playAlarm(uv) {
   if (uv >= 6.5 && audioUnlocked) {
     alarm.currentTime = 0;
@@ -88,73 +76,73 @@ function playAlarm(uv) {
   }
 }
 
-// 🗺️ SAFE MAP INIT
+// 🗺️ map
 function initMap(lat, lon) {
 
+  if (map) map.remove();
+
+  map = L.map("map").setView([lat, lon], 13);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(map);
+
+  L.marker([lat, lon])
+    .addTo(map)
+    .bindPopup("📍 You are here")
+    .openPopup();
+
   setTimeout(() => {
-
-    if (map) {
-      map.remove();
-      map = null;
-    }
-
-    map = L.map("map").setView([lat, lon], 13);
-
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: "© OpenStreetMap"
-    }).addTo(map);
-
-    L.marker([lat, lon])
-      .addTo(map)
-      .bindPopup("📍 You are here")
-      .openPopup();
-
-    setTimeout(() => {
-      map.invalidateSize();
-    }, 300);
-
-  }, 200);
+    map.invalidateSize();
+  }, 300);
 }
 
-// 🚀 START SCAN (FULL FIXED FLOW)
+// 🚀 START (APPLE-LIKE UV LOGIC)
 startBtn.addEventListener("click", () => {
 
   statusText.textContent = "Activating system...";
 
   audioUnlocked = true;
-  unlockAudio();
+
+  alarm.play().then(() => {
+    alarm.pause();
+    alarm.currentTime = 0;
+  }).catch(() => {});
 
   navigator.geolocation.getCurrentPosition(async (pos) => {
 
     const lat = pos.coords.latitude;
     const lon = pos.coords.longitude;
 
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=uv_index&timezone=auto`;
+    // ☀️ APPLE-LIKE UV REQUEST
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=uv_index&hourly=cloud_cover&timezone=auto`;
 
     try {
 
       const res = await fetch(url);
       const data = await res.json();
 
-      const times = data.hourly.time;
-      const values = data.hourly.uv_index;
+      // ☀️ base UV
+      let uv = data.current?.uv_index ?? 0;
 
-      const now = new Date().toISOString().slice(0, 13);
-      const index = times.findIndex(t => t.startsWith(now));
+      // ☁️ cloud adjustment (Apple-like smoothing)
+      const hour = new Date().getHours();
+      const cloud = data.hourly?.cloud_cover?.[hour] ?? 0;
 
-      const uv = values[index] ?? 0;
+      const cloudFactor = 1 - (cloud / 100) * 0.6;
+      uv = uv * cloudFactor;
+
+      uv = Math.round(uv * 10) / 10;
 
       // UI
       statusText.style.display = "none";
       result.classList.remove("hidden");
 
-      uvValue.textContent = `UV INDEX (NOW): ${uv}`;
+      uvValue.textContent = `Current UV Index: ${uv}`;
       message.textContent = getMessage(uv);
 
-      // ☀️ TOP OF DAY FIXED
-      if (topOfDay) {
-        topOfDay.textContent = `☀️ Today's peak UV in your area is ${uv}`;
-      }
+      // ☀️ TOP OF DAY
+      topOfDay.textContent = `☀️ Today's peak UV in your area is ${uv}`;
 
       initMap(lat, lon);
       speakUV(uv);
