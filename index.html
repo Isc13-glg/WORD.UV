@@ -7,40 +7,32 @@
 
 <link rel="stylesheet" href="style.css"/>
 
-<!-- 🗺️ Leaflet map (REQUIRED) -->
+<!-- 🗺️ Leaflet -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
 
 <body>
 
-<!-- 🚨 TOP WARNING -->
 <div class="topbar">
-  🚨 UV MONITORING SYSTEM — CLASSIFIED ALERT🚨
+  🚨 UV MONITORING SYSTEM — CLASSIFIED ALERT
 </div>
 
-<!-- 👤 USER -->
-<h2 class="user">Welcome to our UV monitoring system</h2>
+<h2 class="user">Welcome in our UV Monitoring System</h2>
 
 <div class="container">
 
-  <!-- START BUTTON -->
   <button id="startBtn">START SCAN</button>
 
-  <!-- STATUS TEXT -->
   <p id="status">Waiting for activation...</p>
 
-  <!-- RESULT AREA -->
   <div id="result" class="hidden">
 
-    <!-- UV INFO -->
     <h2 id="uvValue"></h2>
     <p id="message"></p>
 
-    <!-- 🗺️ MAP -->
     <div id="map"></div>
 
-    <!-- 🌍 CITY SEARCH -->
     <h3>European Monitoring Grid</h3>
     <input id="search" placeholder="Search city..." />
     <ul id="cityList"></ul>
@@ -49,13 +41,10 @@
 
 </div>
 
-<!-- 🔊 ALARM SOUND -->
 <audio id="alarm">
   <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
 </audio>
 
-<!-- ⚙️ SCRIPT -->
 <script src="script.js"></script>
-
 </body>
 </html>
