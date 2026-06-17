@@ -1,23 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>UV Checker 😎</title>
-  <link rel="stylesheet" href="style.css"/>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EU UV Emergency System</title>
+
+<link rel="stylesheet" href="style.css"/>
+
+<!-- Leaflet map -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
+
 <body>
 
-  <div class="card">
-    <h1>🌞 UV Level Checker</h1>
-    <p id="status">Getting your location...</p>
+<div class="container">
 
-    <div id="result" class="hidden">
-      <h2 id="uvValue"></h2>
-      <p id="message"></p>
-    </div>
+  <!-- FAKE GOVERNMENT HEADER -->
+  <div class="alert-banner">
+    🚨 EUROPEAN UV MONITORING SYSTEM — CLASSIFIED ALERT 🚨
   </div>
 
-  <script src="script.js"></script>
+  <h2 id="nameTag">User: Κυριακή Ανδρέου</h2>
+
+  <button id="startBtn">📍 Enable Location & Start Scan</button>
+
+  <p id="status">Waiting for activation...</p>
+
+  <div id="panel" class="hidden">
+
+    <h1 id="uvText"></h1>
+    <p id="warning"></p>
+
+    <div id="map"></div>
+
+    <h3>🌍 European Cities</h3>
+    <input id="search" placeholder="Search city..." />
+
+    <ul id="cityList"></ul>
+
+  </div>
+</div>
+
+<audio id="alarm">
+  <source src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" type="audio/ogg">
+</audio>
+
+<script src="script.js"></script>
 </body>
 </html>
