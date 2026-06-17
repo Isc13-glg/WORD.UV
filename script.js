@@ -1,33 +1,100 @@
-const statusText = document.getElementById("status");
-const uvValue = document.getElementById("uvValue");
-const message = document.getElementById("message");
-const result = document.getElementById("result");
+const startBtn = document.getElementById("startBtn");
+const status = document.getElementById("status");
+const panel = document.getElementById("panel");
+const uvText = document.getElementById("uvText");
+const warning = document.getElementById("warning");
+const alarm = document.getElementById("alarm");
 
-function getGreekMessage(uv) {
-  if (uv <= 2) return "🧊 Chill ρε, είσαι safe.";
-  if (uv <= 5) return "😎 Λίγο αντηλιακό δεν βλάπτει.";
-  if (uv <= 7) return "☀️ Καίει λίγο, πρόσεχε.";
-  if (uv <= 10) return "🔥 ΜΗΝ ΠΑΣ ΕΞΩ. Θα καείς.";
-  return "☠️ ΤΕΛΟΣ. Μείνε μέσα.";
+const cityList = document.getElementById("cityList");
+const search = document.getElementById("search");
+
+// 🌍 small sample (alphabetical Europe incl. Paphos)
+const cities = [
+  "Amsterdam", "Athens", "Berlin", "Brussels", "Bucharest",
+  "Budapest", "Copenhagen", "Dublin", "Helsinki", "Kyiv",
+  "Lisbon", "London", "Madrid", "Nicosia", "Oslo",
+  "Paris", "Paphos", "Prague", "Rome", "Sofia", "Vienna", "Warsaw"
+].sort();
+
+function renderCities(list) {
+  cityList.innerHTML = "";
+  list.forEach(c => {
+    const li = document.createElement("li");
+    li.textContent = c;
+    cityList.appendChild(li);
+  });
 }
 
-navigator.geolocation.getCurrentPosition(async (pos) => {
-  const lat = pos.coords.latitude;
-  const lon = pos.coords.longitude;
+renderCities(cities);
 
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=uv_index_max&timezone=auto`;
+// search filter
+search?.addEventListener("input", e => {
+  const filtered = cities.filter(c =>
+    c.toLowerCase().includes(e.target.value.toLowerCase())
+  );
+  renderCities(filtered);
+});
 
-  const res = await fetch(url);
-  const data = await res.json();
+// UV messages
+function getMsg(uv) {
+  if (uv <= 2) return "🧊 Safe zone. Κυριακή Ανδρέου may proceed.";
+  if (uv <= 5) return "😎 Moderate UV. Some risk detected.";
+  if (uv <= 7) return "☀️ High UV. Protective action advised.";
+  if (uv <= 10) return "🔥 EXTREME UV ALERT — STAY INDOORS.";
+  return "☠️ CRITICAL RADIATION LEVEL — SYSTEM WARNING";
+}
 
-  const uv = data.daily.uv_index_max[0];
+// SOUND
+function playAlarm() {
+  alarm.play();
+}
 
-  statusText.style.display = "none";
-  result.classList.remove("hidden");
+// MAP
+let map;
 
-  uvValue.textContent = `UV Index: ${uv}`;
-  message.textContent = getGreekMessage(uv);
+function initMap(lat, lon) {
+  map = L.map('map').setView([lat, lon], 10);
 
-}, () => {
-  statusText.textContent = "Enable location to continue 😢";
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap'
+  }).addTo(map);
+
+  L.marker([lat, lon]).addTo(map)
+    .bindPopup("You are here (UV monitored zone)")
+    .openPopup();
+}
+
+// START BUTTON (fixes iPhone issue)
+startBtn.addEventListener("click", () => {
+
+  status.textContent = "Requesting location...";
+
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+
+    const lat = pos.coords.latitude;
+    const lon = pos.coords.longitude;
+
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=uv_index_max&timezone=auto`;
+
+    const res = await fetch(url);
+    const data = await res.json();
+
+    const uv = data.daily.uv_index_max[0];
+
+    status.style.display = "none";
+    panel.classList.remove("hidden");
+
+    uvText.textContent = `UV INDEX: ${uv}`;
+    warning.textContent = getMsg(uv);
+
+    initMap(lat, lon);
+
+    if (uv >= 7) {
+      playAlarm();
+    }
+
+  }, () => {
+    status.textContent = "Location blocked. Enable permissions in Safari settings.";
+  });
+
 });
