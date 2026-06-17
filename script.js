@@ -11,7 +11,7 @@ const topOfDay = document.getElementById("topOfDay");
 let map;
 let audioUnlocked = false;
 
-// 🌍 Cities
+// 🌍 cities
 const cities = [
   "Amsterdam","Athens","Berlin","Brussels","Bucharest",
   "Budapest","Copenhagen","Dublin","Helsinki","Kyiv",
@@ -30,21 +30,20 @@ function renderCities(list = cities) {
 
 renderCities();
 
-// 🔎 search
-search?.addEventListener("input", (e) => {
+search.addEventListener("input", e => {
   const filtered = cities.filter(c =>
     c.toLowerCase().includes(e.target.value.toLowerCase())
   );
   renderCities(filtered);
 });
 
-// ☀️ UV message
+// ☀️ message
 function getMessage(uv) {
-  if (uv <= 2) return "🧊 Safe UV level.";
-  if (uv <= 5) return "😎 Moderate UV.";
-  if (uv <= 7) return "☀️ High UV warning.";
-  if (uv <= 10) return "🔥 EXTREME UV.";
-  return "☠️ CRITICAL DANGER.";
+  if (uv <= 2) return "Safe UV";
+  if (uv <= 5) return "Moderate UV";
+  if (uv <= 7) return "High UV warning";
+  if (uv <= 10) return "Extreme UV";
+  return "Critical danger";
 }
 
 // 🎤 voice
@@ -53,22 +52,17 @@ function speakUV(uv) {
 
   window.speechSynthesis.cancel();
 
-  let text = `UV index is ${uv}.`;
+  const msg = new SpeechSynthesisUtterance(
+    `UV index is ${uv}. ${getMessage(uv)}`
+  );
 
-  if (uv <= 2) text += " Low risk.";
-  else if (uv <= 5) text += " Moderate exposure.";
-  else if (uv <= 7) text += " High UV warning.";
-  else if (uv <= 10) text += " Extreme UV detected.";
-  else text += " Critical danger level.";
-
-  const msg = new SpeechSynthesisUtterance(text);
   msg.lang = "en-US";
   msg.rate = 1;
 
   window.speechSynthesis.speak(msg);
 }
 
-// 🔊 alarm ≥ 6.5
+// 🔊 alarm
 function playAlarm(uv) {
   if (uv >= 6.5 && audioUnlocked) {
     alarm.currentTime = 0;
@@ -78,7 +72,6 @@ function playAlarm(uv) {
 
 // 🗺️ map
 function initMap(lat, lon) {
-
   if (map) map.remove();
 
   map = L.map("map").setView([lat, lon], 13);
@@ -87,17 +80,12 @@ function initMap(lat, lon) {
     attribution: "© OpenStreetMap"
   }).addTo(map);
 
-  L.marker([lat, lon])
-    .addTo(map)
-    .bindPopup("📍 You are here")
-    .openPopup();
+  L.marker([lat, lon]).addTo(map);
 
-  setTimeout(() => {
-    map.invalidateSize();
-  }, 300);
+  setTimeout(() => map.invalidateSize(), 300);
 }
 
-// 🚀 START (APPLE-LIKE UV LOGIC)
+// 🚀 START
 startBtn.addEventListener("click", () => {
 
   statusText.textContent = "Activating system...";
@@ -114,46 +102,51 @@ startBtn.addEventListener("click", () => {
     const lat = pos.coords.latitude;
     const lon = pos.coords.longitude;
 
-    // ☀️ APPLE-LIKE UV REQUEST
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=uv_index&hourly=cloud_cover&timezone=auto`;
+    // ☀️ REAL FIXED UV REQUEST
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=uv_index,cloud_cover&timezone=auto`;
 
-    try {
+    const res = await fetch(url);
+    const data = await res.json();
 
-      const res = await fetch(url);
-      const data = await res.json();
+    // ⏱️ closest time matching (FIX)
+    const times = data.hourly.time;
+    const uvArr = data.hourly.uv_index;
+    const cloudArr = data.hourly.cloud_cover;
 
-      // ☀️ base UV
-      let uv = data.current?.uv_index ?? 0;
+    const now = new Date();
 
-      // ☁️ cloud adjustment (Apple-like smoothing)
-      const hour = new Date().getHours();
-      const cloud = data.hourly?.cloud_cover?.[hour] ?? 0;
+    let idx = 0;
+    let best = Infinity;
 
-      const cloudFactor = 1 - (cloud / 100) * 0.6;
-      uv = uv * cloudFactor;
-
-      uv = Math.round(uv * 10) / 10;
-
-      // UI
-      statusText.style.display = "none";
-      result.classList.remove("hidden");
-
-      uvValue.textContent = `Current UV Index: ${uv}`;
-      message.textContent = getMessage(uv);
-
-      // ☀️ TOP OF DAY
-      topOfDay.textContent = `☀️ Today's peak UV in your area is ${uv}`;
-
-      initMap(lat, lon);
-      speakUV(uv);
-      playAlarm(uv);
-
-    } catch (e) {
-      statusText.textContent = "UV system failed — retry.";
+    for (let i = 0; i < times.length; i++) {
+      const diff = Math.abs(new Date(times[i]) - now);
+      if (diff < best) {
+        best = diff;
+        idx = i;
+      }
     }
 
-  }, () => {
-    statusText.textContent = "Location permission denied.";
+    let uv = uvArr[idx];
+    const cloud = cloudArr[idx] ?? 0;
+
+    // ☁️ Apple-like smoothing
+    uv = uv * (1 - (cloud / 100) * 0.65);
+
+    uv = Math.max(0, Math.min(11, uv));
+    uv = Math.round(uv * 10) / 10;
+
+    statusText.style.display = "none";
+    result.classList.remove("hidden");
+
+    uvValue.textContent = `UV Index: ${uv}`;
+    message.textContent = getMessage(uv);
+
+    topOfDay.textContent = `☀️ Today's peak UV in your area is ${uv}`;
+
+    initMap(lat, lon);
+    speakUV(uv);
+    playAlarm(uv);
+
   });
 
 });
