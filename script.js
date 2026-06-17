@@ -3,38 +3,82 @@ const statusText = document.getElementById("status");
 const uvValue = document.getElementById("uvValue");
 const message = document.getElementById("message");
 const result = document.getElementById("result");
+const alarm = document.getElementById("alarm");
+const cityList = document.getElementById("cityList");
+const search = document.getElementById("search");
 
-// ☀️ messages
-function getMessage(uv) {
-  if (uv <= 2) return "🧊 Safe UV level.";
-  if (uv <= 5) return "😎 Moderate exposure.";
-  if (uv <= 7) return "☀️ High UV warning.";
-  if (uv <= 10) return "🔥 EXTREME UV — stay inside.";
-  return "☠️ CRITICAL DANGER LEVEL.";
+let map;
+
+// 🌍 cities (alphabetical incl. Paphos)
+const cities = [
+  "Amsterdam","Athens","Berlin","Brussels","Bucharest",
+  "Budapest","Copenhagen","Dublin","Helsinki","Kyiv",
+  "Lisbon","London","Madrid","Nicosia","Oslo",
+  "Paris","Paphos","Prague","Rome","Sofia","Vienna","Warsaw"
+].sort();
+
+function renderCities(list = cities) {
+  cityList.innerHTML = "";
+  list.forEach(c => {
+    const li = document.createElement("li");
+    li.textContent = c;
+    cityList.appendChild(li);
+  });
 }
 
-// 🎤 voice system
+renderCities();
+
+search?.addEventListener("input", (e) => {
+  const filtered = cities.filter(c =>
+    c.toLowerCase().includes(e.target.value.toLowerCase())
+  );
+  renderCities(filtered);
+});
+
+// ☀️ message system
+function getMessage(uv) {
+  if (uv <= 2) return "🧊 Safe UV level.";
+  if (uv <= 5) return "😎 Moderate UV.";
+  if (uv <= 7) return "☀️ High UV warning.";
+  if (uv <= 10) return "🔥 EXTREME UV.";
+  return "☠️ CRITICAL DANGER.";
+}
+
+// 🎤 voice
 function speakUV(uv) {
-
-  let text = "";
-
-  if (uv <= 2) text = `UV index is ${uv}. Low risk detected.`;
-  else if (uv <= 5) text = `UV index is ${uv}. Moderate exposure.`;
-  else if (uv <= 7) text = `UV index is ${uv}. High UV warning.`;
-  else if (uv <= 10) text = `UV index is ${uv}. Extreme UV detected.`;
-  else text = `UV index is ${uv}. Critical danger level.`;
+  let text = `UV index is ${uv}.`;
 
   const speech = new SpeechSynthesisUtterance(text);
   speech.lang = "en-US";
   speech.rate = 1;
-
   window.speechSynthesis.speak(speech);
 }
 
-// 🚀 START SCAN
+// 🔊 alarm
+function playAlarm(uv) {
+  if (uv >= 7) {
+    alarm.play().catch(() => {});
+  }
+}
+
+// 🗺️ map
+function initMap(lat, lon) {
+  map = L.map("map").setView([lat, lon], 13);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "© OpenStreetMap"
+  }).addTo(map);
+
+  L.marker([lat, lon])
+    .addTo(map)
+    .bindPopup("📍 You are here")
+    .openPopup();
+}
+
+// 🚀 START
 startBtn.addEventListener("click", () => {
 
-  statusText.textContent = "Locating user...";
+  statusText.textContent = "Scanning location...";
 
   navigator.geolocation.getCurrentPosition(async (pos) => {
 
@@ -54,10 +98,12 @@ startBtn.addEventListener("click", () => {
     uvValue.textContent = `UV INDEX: ${uv}`;
     message.textContent = getMessage(uv);
 
+    initMap(lat, lon);
     speakUV(uv);
+    playAlarm(uv);
 
   }, () => {
-    statusText.textContent = "Location permission denied.";
+    statusText.textContent = "Location blocked.";
   });
 
 });
