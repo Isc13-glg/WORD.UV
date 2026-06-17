@@ -32,16 +32,11 @@ button {
   cursor: pointer;
 }
 
-#map {
-  height: 300px;
-  margin-top: 10px;
-  border-radius: 10px;
-}
-
 .hidden {
   display: none;
 }
 
+/* ☀️ TOP OF DAY */
 .top-day {
   background: #1b2a4a;
   color: #00ffcc;
@@ -49,6 +44,15 @@ button {
   margin: 10px;
   border-radius: 8px;
   font-weight: bold;
+}
+
+/* 🗺️ MAP FIX (THIS WAS YOUR MAIN ISSUE) */
+#map {
+  height: 300px;
+  width: 100%;
+  margin-top: 10px;
+  border-radius: 10px;
+  display: block;
 }
 
 input {
