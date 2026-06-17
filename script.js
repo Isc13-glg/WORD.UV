@@ -9,7 +9,7 @@ const search = document.getElementById("search");
 
 let map;
 
-// 🌍 cities (alphabetical incl. Paphos)
+// 🌍 European cities (alphabetical incl. Paphos)
 const cities = [
   "Amsterdam","Athens","Berlin","Brussels","Bucharest",
   "Budapest","Copenhagen","Dublin","Helsinki","Kyiv",
@@ -28,6 +28,7 @@ function renderCities(list = cities) {
 
 renderCities();
 
+// 🔎 search filter
 search?.addEventListener("input", (e) => {
   const filtered = cities.filter(c =>
     c.toLowerCase().includes(e.target.value.toLowerCase())
@@ -35,7 +36,7 @@ search?.addEventListener("input", (e) => {
   renderCities(filtered);
 });
 
-// ☀️ message system
+// ☀️ UV messages
 function getMessage(uv) {
   if (uv <= 2) return "🧊 Safe UV level.";
   if (uv <= 5) return "😎 Moderate UV.";
@@ -44,25 +45,37 @@ function getMessage(uv) {
   return "☠️ CRITICAL DANGER.";
 }
 
-// 🎤 voice
+// 🎤 VOICE OUTPUT
 function speakUV(uv) {
   let text = `UV index is ${uv}.`;
+
+  if (uv <= 2) text += " Low risk.";
+  else if (uv <= 5) text += " Moderate exposure.";
+  else if (uv <= 7) text += " High UV warning.";
+  else if (uv <= 10) text += " Extreme UV detected.";
+  else text += " Critical danger level.";
 
   const speech = new SpeechSynthesisUtterance(text);
   speech.lang = "en-US";
   speech.rate = 1;
+
   window.speechSynthesis.speak(speech);
 }
 
-// 🔊 alarm
+// 🔊 ALARM
 function playAlarm(uv) {
   if (uv >= 7) {
     alarm.play().catch(() => {});
   }
 }
 
-// 🗺️ map
+// 🗺️ MAP (FIXED FOR CHROME/SAFARI)
 function initMap(lat, lon) {
+
+  if (map) {
+    map.remove(); // prevent duplicate map bugs
+  }
+
   map = L.map("map").setView([lat, lon], 13);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -73,9 +86,13 @@ function initMap(lat, lon) {
     .addTo(map)
     .bindPopup("📍 You are here")
     .openPopup();
+
+  setTimeout(() => {
+    map.invalidateSize(); // IMPORTANT FIX
+  }, 300);
 }
 
-// 🚀 START
+// 🚀 START BUTTON
 startBtn.addEventListener("click", () => {
 
   statusText.textContent = "Scanning location...";
@@ -103,7 +120,7 @@ startBtn.addEventListener("click", () => {
     playAlarm(uv);
 
   }, () => {
-    statusText.textContent = "Location blocked.";
+    statusText.textContent = "Location permission denied.";
   });
 
 });
