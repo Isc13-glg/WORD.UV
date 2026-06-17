@@ -1,5 +1,5 @@
 body {
-  font-family: Arial, sans-serif;
+  font-family: Arial;
   margin: 0;
   background: #0b1220;
   color: white;
@@ -8,14 +8,11 @@ body {
 
 .topbar {
   background: red;
-  color: white;
   padding: 10px;
   font-weight: bold;
 }
 
 .user {
-  margin: 10px;
-  font-size: 16px;
   opacity: 0.8;
 }
 
@@ -25,7 +22,6 @@ body {
 
 button {
   padding: 12px 20px;
-  font-size: 16px;
   background: #00ffcc;
   border: none;
   border-radius: 8px;
@@ -38,10 +34,10 @@ button {
 
 .top-day {
   background: #1b2a4a;
-  color: #00ffcc;
   padding: 10px;
   margin: 10px;
   border-radius: 8px;
+  color: #00ffcc;
   font-weight: bold;
 }
 
@@ -54,8 +50,8 @@ button {
 
 input {
   padding: 8px;
-  margin: 10px;
   width: 80%;
+  margin: 10px;
 }
 
 ul {
