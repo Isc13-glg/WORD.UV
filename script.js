@@ -3,35 +3,36 @@ const startBtn = document.getElementById("startBtn");
 const status = document.getElementById("status");
 const card = document.getElementById("card");
 
-const tempBox = document.getElementById("tempBox");
-const uvBox = document.getElementById("uvBox");
-const windBox = document.getElementById("windBox");
-const humidBox = document.getElementById("humidBox");
-const message = document.getElementById("message");
+const tempBox = document.getElementById("temp");
+const uvBox = document.getElementById("uv");
+const windBox = document.getElementById("wind");
+const humBox = document.getElementById("hum");
+const msg = document.getElementById("msg");
 
 const alarm = document.getElementById("alarm");
 
 let map;
 let unlocked = false;
 
-// 🔊 voice
+// 🔊 iPhone SAFE VOICE
 function speak(text){
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "en-US";
   u.rate = 1;
+
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
 }
 
-// ☀️ UV message
-function uvMsg(u){
-  if(u <= 2) return "Low UV";
-  if(u <= 5) return "Moderate UV";
-  if(u <= 7) return "High UV";
+// ☀️ UV text
+function uvText(u){
+  if(u<=2) return "Low UV";
+  if(u<=5) return "Moderate UV";
+  if(u<=7) return "High UV";
   return "Extreme UV";
 }
 
-// 🔊 alarm
+// 🔊 alarm ONLY ≥ 6.5
 function playAlarm(uv){
   if(uv >= 6.5 && unlocked){
     alarm.currentTime = 0;
@@ -39,10 +40,10 @@ function playAlarm(uv){
   }
 }
 
-// 🗺️ FIXED MAP (NO GREY BUG)
+// 🗺 FIX MAP (NO GREY BUG)
 function loadMap(lat,lon){
 
-  setTimeout(() => {
+  setTimeout(()=>{
 
     if(map){
       map.remove();
@@ -57,16 +58,16 @@ function loadMap(lat,lon){
 
     L.marker([lat,lon]).addTo(map);
 
-    setTimeout(() => map.invalidateSize(true), 600);
+    setTimeout(()=>map.invalidateSize(true),600);
 
-  }, 300);
+  },300);
 }
 
-// 🌍 REAL WEATHER API
+// 🌍 WEATHER API
 async function getWeather(lat,lon){
 
   const url =
-  `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,uv_index,relative_humidity_2m,wind_speed_10m&timezone=auto`;
+  `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,uv_index,wind_speed_10m,relative_humidity_2m&timezone=auto`;
 
   const res = await fetch(url);
   const data = await res.json();
@@ -90,17 +91,17 @@ async function getWeather(lat,lon){
   };
 }
 
-// 🚀 START
-startBtn.onclick = () => {
+// 🚀 START (FIXED iPHONE ISSUE)
+startBtn.onclick = async () => {
 
   unlocked = true;
+
+  status.textContent = "Getting location...";
 
   navigator.geolocation.getCurrentPosition(async pos => {
 
     const lat = pos.coords.latitude;
     const lon = pos.coords.longitude;
-
-    status.textContent = "Loading weather...";
 
     loadMap(lat,lon);
 
@@ -109,14 +110,14 @@ startBtn.onclick = () => {
     card.classList.remove("hidden");
     status.style.display = "none";
 
-    tempBox.textContent = `🌡️ ${w.temp}°C`;
-    uvBox.textContent = `☀️ UV ${w.uv}`;
-    windBox.textContent = `💨 ${w.wind} km/h`;
-    humidBox.textContent = `💧 ${w.hum}%`;
+    tempBox.textContent = `${w.temp}°C`;
+    uvBox.textContent = `UV ${w.uv}`;
+    windBox.textContent = `${w.wind} km/h`;
+    humBox.textContent = `${w.hum}%`;
 
-    message.textContent = uvMsg(w.uv);
+    msg.textContent = uvText(w.uv);
 
-    speak(`Temperature is ${w.temp} degrees. UV index is ${w.uv}`);
+    speak(`Temperature is ${w.temp} degrees. UV is ${w.uv}`);
 
     playAlarm(w.uv);
 
