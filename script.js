@@ -1,5 +1,3 @@
-const app = document.getElementById("app");
-const intro = document.getElementById("welcome");
 
 const startBtn = document.getElementById("startBtn");
 const manualBtn = document.getElementById("manualBtn");
@@ -12,8 +10,7 @@ const loadManual = document.getElementById("loadManual");
 const status = document.getElementById("status");
 const loader = document.getElementById("loader");
 
-const mainCard = document.getElementById("mainCard");
-const cards = document.getElementById("cards");
+const card = document.getElementById("card");
 
 const temp = document.getElementById("temp");
 const feels = document.getElementById("feels");
@@ -21,28 +18,18 @@ const uv = document.getElementById("uv");
 const wind = document.getElementById("wind");
 const hum = document.getElementById("hum");
 const vis = document.getElementById("vis");
-const sun = document.getElementById("sun");
 
 const bigTemp = document.getElementById("bigTemp");
 const conditionText = document.getElementById("conditionText");
 
-const mapScreen = document.getElementById("mapScreen");
-const mapContainer = document.getElementById("mapContainer");
+const bg = document.getElementById("bg");
 
+const mapBox = document.getElementById("mapBox");
 const mapExpand = document.getElementById("mapExpand");
 const mapMinimise = document.getElementById("mapMinimise");
-const mapExit = document.getElementById("mapExit");
 
 let map;
 let selectMode = false;
-
-/* INTRO */
-window.onload = () => {
-  setTimeout(()=>{
-    intro.style.display="none";
-    app.classList.remove("hidden");
-  },1500);
-};
 
 /* COUNTRIES */
 const locations = [
@@ -59,8 +46,19 @@ locations.forEach(l=>{
   countrySelect.appendChild(o);
 });
 
+/* BACKGROUND */
+function setBg(code){
+  if(code<=3){
+    bg.style.background="linear-gradient(#4facfe,#00f2fe)";
+  } else if(code<=60){
+    bg.style.background="linear-gradient(#555,#999)";
+  } else {
+    bg.style.background="linear-gradient(#111,#000)";
+  }
+}
+
 /* MAP */
-function loadMap(lat,lon){
+function initMap(lat,lon){
 
   if(map) map.remove();
 
@@ -71,7 +69,6 @@ function loadMap(lat,lon){
 
   map.on("click",(e)=>{
     if(selectMode){
-      selectMode=false;
       loadWeather(e.latlng.lat,e.latlng.lng);
     }
   });
@@ -88,9 +85,8 @@ async function getWeather(lat,lon){
   const res = await fetch(url);
   const data = await res.json();
 
-  let i=0;
-  const now=new Date();
-  let best=999999;
+  const now = new Date();
+  let i=0,best=999999;
 
   for(let x=0;x<data.hourly.time.length;x++){
     let d=Math.abs(new Date(data.hourly.time[x]) - now);
@@ -104,30 +100,24 @@ async function getWeather(lat,lon){
     wind:data.hourly.wind_speed_10m[i],
     hum:data.hourly.relative_humidity_2m[i],
     vis:data.hourly.visibility[i],
-    code:data.hourly.weather_code[i],
-    sunrise:data.daily.sunrise[0],
-    sunset:data.daily.sunset[0]
+    code:data.hourly.weather_code[i]
   };
 }
 
-/* LOAD WEATHER */
+/* LOAD */
 async function loadWeather(lat,lon){
 
-  mapScreen.classList.add("hidden");
-
   loader.classList.remove("hidden");
-  status.textContent="Loading...";
+
+  if(!map){
+    initMap(lat,lon);
+  }
 
   const w = await getWeather(lat,lon);
 
   loader.classList.add("hidden");
-  status.style.display="none";
 
-  mainCard.classList.remove("hidden");
-  cards.classList.remove("hidden");
-
-  bigTemp.textContent = `${w.temp}°`;
-  conditionText.textContent = "Weather";
+  card.classList.remove("hidden");
 
   temp.textContent=w.temp;
   feels.textContent=w.feels;
@@ -136,56 +126,44 @@ async function loadWeather(lat,lon){
   hum.textContent=w.hum;
   vis.textContent=w.vis;
 
-  sun.innerHTML=`🌅 ${w.sunrise.split("T")[1]}<br>🌇 ${w.sunset.split("T")[1]}`;
+  bigTemp.textContent=w.temp+"°";
+  conditionText.textContent="Weather";
+
+  setBg(w.code);
 }
 
 /* BUTTONS */
-startBtn.onclick = () => {
+startBtn.onclick=()=>{
   navigator.geolocation.getCurrentPosition(p=>{
     loadWeather(p.coords.latitude,p.coords.longitude);
   });
 };
 
-manualBtn.onclick = () => {
+manualBtn.onclick=()=>{
   manualBox.classList.toggle("hidden");
 };
 
-loadManual.onclick = () => {
-  const l = JSON.parse(countrySelect.value);
+loadManual.onclick=()=>{
+  const l=JSON.parse(countrySelect.value);
   loadWeather(l.lat,l.lon);
 };
 
-/* MAP MODE */
-mapSelectBtn.onclick = () => {
-
-  selectMode = true;
-
-  app.classList.remove("hidden");
-  mapScreen.classList.remove("hidden");
-
-  if(!map){
-    loadMap(35.1856,33.3823);
-  }
-
-  setTimeout(()=>map.invalidateSize(),300);
+mapSelectBtn.onclick=()=>{
+  selectMode=true;
+  status.textContent="Tap map to choose";
 };
 
-/* MAP BUTTONS */
-mapExpand.onclick = () => {
-  mapContainer.classList.add("expanded");
+/* MAP EXPAND */
+mapExpand.onclick=()=>{
+  mapBox.classList.add("expanded");
   mapMinimise.classList.remove("hidden");
   mapExpand.classList.add("hidden");
-  setTimeout(()=>map.invalidateSize(),300);
+  setTimeout(()=>map.invalidateSize(),200);
 };
 
-mapMinimise.onclick = () => {
-  mapContainer.classList.remove("expanded");
+mapMinimise.onclick=()=>{
+  mapBox.classList.remove("expanded");
   mapMinimise.classList.add("hidden");
   mapExpand.classList.remove("hidden");
-  setTimeout(()=>map.invalidateSize(),300);
-};
-
-mapExit.onclick = () => {
-  selectMode = false;
-  mapScreen.classList.add("hidden");
+  setTimeout(()=>map.invalidateSize(),200);
 };
