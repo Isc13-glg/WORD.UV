@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<title>Weather Pro</title>
+<title>SkyNow</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,31 +21,37 @@
 <!-- 🌟 WELCOME -->
 <div id="welcome">
   <div class="welcomeCard">
-    <h1>🌤 SkyNow</h1>
-    <p>Loading experience...</p>
+    <h1>☁️ SkyNow</h1>
+    <p>Loading live weather...</p>
   </div>
 </div>
 
-<!-- 🌈 BACKGROUND -->
 <div id="bg"></div>
 
-<!-- SCREEN WRAPPER -->
 <div id="mainScreen" class="screen">
 
   <div class="app">
 
-    <h1>Weather Pro</h1>
+    <h1 class="title">SkyNow</h1>
 
+    <!-- 🌟 BIG WOW BUTTONS -->
     <div class="controls">
-      <button id="startBtn">📍 My Location</button>
-      <button id="manualBtn">🌍 Manual</button>
+
+      <button id="startBtn" class="bigBtn">
+        📍 Use My Location
+      </button>
+
+      <button id="manualBtn" class="bigBtn secondary">
+        🌍 Choose Manually
+      </button>
+
     </div>
 
-    <div id="status">Choose mode</div>
+    <div id="status">Select a mode</div>
 
     <div id="manualBox" class="hidden">
       <select id="countrySelect"></select>
-      <button id="loadManual">Load</button>
+      <button id="loadManual">Load Weather</button>
     </div>
 
     <div id="loader" class="hidden"></div>
