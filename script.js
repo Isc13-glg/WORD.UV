@@ -1,4 +1,3 @@
-
 const startBtn = document.getElementById("startBtn");
 const manualBtn = document.getElementById("manualBtn");
 const loadManual = document.getElementById("loadManual");
@@ -8,7 +7,12 @@ const countrySelect = document.getElementById("countrySelect");
 
 const status = document.getElementById("status");
 const loader = document.getElementById("loader");
-const card = document.getElementById("card");
+
+const mainCard = document.getElementById("mainCard");
+const cards = document.getElementById("cards");
+
+const bigTemp = document.getElementById("bigTemp");
+const conditionText = document.getElementById("conditionText");
 
 const temp = document.getElementById("temp");
 const feels = document.getElementById("feels");
@@ -17,53 +21,77 @@ const wind = document.getElementById("wind");
 const hum = document.getElementById("hum");
 const vis = document.getElementById("vis");
 const sun = document.getElementById("sun");
-const cond = document.getElementById("cond");
+
+const bg = document.getElementById("bg");
 
 let map;
 
-// 🌍 locations
+// 🌍 fallback cities
 const locations = [
   {name:"Cyprus", lat:35.1856, lon:33.3823},
-  {name:"Greece", lat:37.9838, lon:23.7275},
-  {name:"UK", lat:51.5072, lon:-0.1276},
-  {name:"USA", lat:40.7128, lon:-74.0060},
-  {name:"France", lat:48.8566, lon:2.3522},
-  {name:"Japan", lat:35.6762, lon:139.6503}
+  {name:"London", lat:51.5072, lon:-0.1276},
+  {name:"Paris", lat:48.8566, lon:2.3522},
+  {name:"Tokyo", lat:35.6762, lon:139.6503},
+  {name:"New York", lat:40.7128, lon:-74.0060}
 ];
 
-// fill dropdown
-locations.forEach(l => {
-  const opt = document.createElement("option");
-  opt.value = JSON.stringify(l);
-  opt.textContent = l.name;
-  countrySelect.appendChild(opt);
+// dropdown
+locations.forEach(l=>{
+  const o = document.createElement("option");
+  o.value = JSON.stringify(l);
+  o.textContent = l.name;
+  countrySelect.appendChild(o);
 });
 
-// 🌤 condition
+// 🌤 weather text
 function weatherText(code){
-  if(code === 0) return "Clear ☀️";
-  if(code <= 3) return "Cloudy ⛅";
-  if(code <= 48) return "Fog 🌫️";
-  if(code <= 67) return "Rain 🌧️";
-  if(code <= 82) return "Showers 🌦️";
-  return "Storm ⛈️";
+  if(code === 0) return "Clear";
+  if(code <= 3) return "Cloudy";
+  if(code <= 48) return "Fog";
+  if(code <= 67) return "Rain";
+  if(code <= 82) return "Showers";
+  return "Storm";
+}
+
+// 🌈 BACKGROUND ENGINE
+function setBackground(code){
+
+  let color;
+
+  if(code === 0){
+    color = "linear-gradient(180deg,#4facfe,#00f2fe)";
+  }
+  else if(code <= 3){
+    color = "linear-gradient(180deg,#757f9a,#d7dde8)";
+  }
+  else if(code <= 48){
+    color = "linear-gradient(180deg,#3a3a3a,#1c1c1c)";
+  }
+  else if(code <= 67){
+    color = "linear-gradient(180deg,#314755,#26a0da)";
+  }
+  else{
+    color = "linear-gradient(180deg,#0f2027,#203a43,#2c5364)";
+  }
+
+  bg.style.background = color;
 }
 
 // 🗺 map
-function loadMap(lat, lon){
+function loadMap(lat,lon){
+
   if(map) map.remove();
 
-  map = L.map("map").setView([lat, lon], 7);
+  map = L.map("map").setView([lat,lon], 7);
 
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    attribution: "© OpenStreetMap"
-  }).addTo(map);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+    .addTo(map);
 
-  L.marker([lat, lon]).addTo(map);
+  L.marker([lat,lon]).addTo(map);
 }
 
-// 🌍 FIXED WEATHER API
-async function getWeather(lat, lon){
+// 🌍 API
+async function getWeather(lat,lon){
 
   const url =
     "https://api.open-meteo.com/v1/forecast" +
@@ -74,7 +102,6 @@ async function getWeather(lat, lon){
     "&timezone=auto";
 
   const res = await fetch(url);
-
   if(!res.ok) throw new Error("API failed");
 
   const data = await res.json();
@@ -85,7 +112,7 @@ async function getWeather(lat, lon){
   let i = 0;
   let best = Infinity;
 
-  for(let x=0; x<times.length; x++){
+  for(let x=0;x<times.length;x++){
     const d = Math.abs(new Date(times[x]) - now);
     if(d < best){ best = d; i = x; }
   }
@@ -103,26 +130,55 @@ async function getWeather(lat, lon){
   };
 }
 
-// 🔥 SAFE GPS
+// 🔥 GPS
 function getLocation(){
-  return new Promise(resolve => {
+  return new Promise(r=>{
     navigator.geolocation.getCurrentPosition(
-      pos => resolve(pos),
-      () => resolve(null),
-      {timeout: 8000}
+      p=>r(p),
+      ()=>r(null),
+      {timeout:8000}
     );
   });
 }
 
-// 🚀 GPS MODE
-startBtn.onclick = async () => {
+// 🚀 MAIN LOAD
+async function loadWeather(lat,lon){
 
-  status.textContent = "Getting location...";
   loader.classList.remove("hidden");
+  status.textContent = "Loading...";
+
+  loadMap(lat,lon);
+
+  const w = await getWeather(lat,lon);
+
+  loader.classList.add("hidden");
+  status.style.display = "none";
+
+  mainCard.classList.remove("hidden");
+  cards.classList.remove("hidden");
+
+  bigTemp.textContent = `${w.temp}°`;
+  conditionText.textContent = weatherText(w.code);
+
+  temp.textContent = `${w.temp}°C`;
+  feels.textContent = `${w.feels}°C`;
+  uv.textContent = `UV ${w.uv}`;
+  wind.textContent = `${w.wind} km/h`;
+  hum.textContent = `${w.hum}%`;
+  vis.textContent = `${w.vis} m`;
+
+  sun.innerHTML =
+    `🌅 ${w.sunrise.split("T")[1]} <br> 🌇 ${w.sunset.split("T")[1]}`;
+
+  setBackground(w.code);
+}
+
+// 📍 GPS button
+startBtn.onclick = async () => {
 
   const pos = await getLocation();
 
-  let lat, lon;
+  let lat,lon;
 
   if(pos){
     lat = pos.coords.latitude;
@@ -130,73 +186,17 @@ startBtn.onclick = async () => {
   } else {
     lat = 35.1856;
     lon = 33.3823;
-    status.textContent = "Using fallback (Cyprus)";
   }
 
-  loadMap(lat, lon);
-
-  try {
-
-    const w = await getWeather(lat, lon);
-
-    loader.classList.add("hidden");
-    status.style.display = "none";
-    card.classList.remove("hidden");
-
-    temp.textContent = "🌡️ " + w.temp + "°C";
-    feels.textContent = "🤗 " + w.feels + "°C";
-    uv.textContent = "☀️ UV " + w.uv;
-    wind.textContent = "💨 " + w.wind;
-    hum.textContent = "💧 " + w.hum + "%";
-    vis.textContent = "👁️ " + w.vis;
-    cond.textContent = "☁️ " + weatherText(w.code);
-
-    sun.innerHTML =
-      "🌅 " + w.sunrise.split("T")[1] +
-      "<br>🌇 " + w.sunset.split("T")[1];
-
-  } catch(e){
-    loader.classList.add("hidden");
-    status.textContent = "Weather failed";
-  }
+  loadWeather(lat,lon);
 };
 
-// 🌍 MANUAL
-manualBtn.onclick = () => {
+// 🌍 manual
+manualBtn.onclick = ()=>{
   manualBox.classList.toggle("hidden");
 };
 
-loadManual.onclick = async () => {
-
-  const loc = JSON.parse(countrySelect.value);
-
-  status.textContent = "Loading...";
-  loader.classList.remove("hidden");
-
-  loadMap(loc.lat, loc.lon);
-
-  try {
-
-    const w = await getWeather(loc.lat, loc.lon);
-
-    loader.classList.add("hidden");
-    status.style.display = "none";
-    card.classList.remove("hidden");
-
-    temp.textContent = "🌡️ " + w.temp + "°C";
-    feels.textContent = "🤗 " + w.feels + "°C";
-    uv.textContent = "☀️ UV " + w.uv;
-    wind.textContent = "💨 " + w.wind;
-    hum.textContent = "💧 " + w.hum + "%";
-    vis.textContent = "👁️ " + w.vis;
-    cond.textContent = "☁️ " + weatherText(w.code);
-
-    sun.innerHTML =
-      "🌅 " + w.sunrise.split("T")[1] +
-      "<br>🌇 " + w.sunset.split("T")[1];
-
-  } catch(e){
-    loader.classList.add("hidden");
-    status.textContent = "Weather failed";
-  }
+loadManual.onclick = ()=>{
+  const l = JSON.parse(countrySelect.value);
+  loadWeather(l.lat,l.lon);
 };
