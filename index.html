@@ -1,28 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>SkyNow</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-
+<link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<link rel="stylesheet" href="style.css"/>
 </head>
 
 <body>
 
-<!-- 🌑 INTRO -->
+<!-- ✅ INTRO -->
 <div id="intro">
   <h1>☁️ SkyNow</h1>
   <div class="loader"></div>
 </div>
 
-<!-- 🌍 MODE SCREEN -->
+<!-- ✅ MODE SCREEN -->
 <div id="modeScreen" class="hidden">
   <h2>Choose Mode</h2>
 
@@ -31,28 +28,12 @@
   <button id="mapPick">🗺️ Pick From Map</button>
 </div>
 
-<!-- APP (YOUR ORIGINAL APP GOES HERE) -->
-<div class="app">
+<!-- ✅ MAIN APP (your weather UI stays here) -->
+<div id="app">
 
-  <!-- 🌍 VIEWING TEXT -->
   <div id="viewingText">🌍 Viewing: --</div>
 
-  <!-- YOUR EXISTING UI -->
-  <button id="startBtn">Start</button>
-
-  <div id="manualBox" class="hidden">
-    <select id="countrySelect"></select>
-    <button id="loadManual">Load</button>
-  </div>
-
-  <div id="loader" class="hidden"></div>
-
-  <div id="mainCard" class="hidden">
-    <div id="bigTemp">--°</div>
-    <div id="conditionText">--</div>
-  </div>
-
-  <div id="cards" class="hidden">
+  <div id="weatherBox">
     <div>🌡️ <span id="temp"></span></div>
     <div>🤗 <span id="feels"></span></div>
     <div>☀️ <span id="uv"></span></div>
@@ -61,10 +42,7 @@
     <div>👁️ <span id="vis"></span></div>
   </div>
 
-  <!-- MAP (KEEP YOUR ORIGINAL MAP CONTAINER) -->
-  <div id="mapContainer">
-    <div id="map"></div>
-  </div>
+  <div id="map"></div>
 
 </div>
 
