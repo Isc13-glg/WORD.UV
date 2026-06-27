@@ -1,45 +1,77 @@
 body {
   margin: 0;
-  font-family: Arial;
-  background: #0b1220;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
   color: white;
+  overflow-x: hidden;
+}
+
+/* 🌈 dynamic background */
+#bg {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  transition: 1s ease;
+  background: linear-gradient(180deg, #1b2a49, #0b1220);
+}
+
+/* APP */
+.app {
+  padding: 16px;
   text-align: center;
 }
 
-.app {
-  padding: 15px;
+/* GLASS CARD */
+.glass {
+  background: rgba(255,255,255,0.10);
+  backdrop-filter: blur(14px);
+  border-radius: 20px;
+  padding: 20px;
+  margin: 15px 0;
 }
 
-button {
-  margin: 5px;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
+/* BIG TEMP */
+#bigTemp {
+  font-size: 64px;
+  font-weight: bold;
 }
 
-.hidden {
-  display: none;
+#conditionText {
+  opacity: 0.8;
 }
 
-#map {
-  height: 250px;
-  margin: 10px 0;
-  border-radius: 12px;
-}
-
+/* GRID */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 12px;
 }
 
-.grid div {
-  background: rgba(255,255,255,0.1);
-  padding: 10px;
-  border-radius: 10px;
+.card {
+  background: rgba(255,255,255,0.08);
+  padding: 14px;
+  border-radius: 16px;
 }
 
+/* MAP */
+#map {
+  height: 220px;
+  border-radius: 14px;
+}
+
+/* LOADER */
 #loader {
-  margin: 10px;
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
 }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.hidden { display: none; }
