@@ -6,7 +6,6 @@
 
 <title>SkyNow</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
@@ -17,75 +16,63 @@
 
 <body>
 
-<!-- 🌟 INTRO -->
 <div id="welcome">
   <div class="welcomeCard">
     <h1>☁️ SkyNow</h1>
-    <p>Loading weather experience...</p>
+    <p>Loading...</p>
   </div>
 </div>
 
 <div id="bg"></div>
 
-<div id="mainScreen">
+<div class="app">
 
-  <div class="app">
+  <h1 class="title">SkyNow</h1>
 
-    <h1 class="title">SkyNow</h1>
+  <div class="controls">
 
-    <!-- BUTTON MODE -->
-    <div class="controls">
+    <button id="startBtn" class="bigBtn">📍 Use My Location</button>
+    <button id="manualBtn" class="bigBtn secondary">🌍 Manual Select</button>
+    <button id="mapSelectBtn" class="bigBtn secondary">🗺️ Choose From Map</button>
 
-      <button id="startBtn" class="bigBtn">📍 Use My Location</button>
+  </div>
 
-      <button id="manualBtn" class="bigBtn secondary">🌍 Choose Manually</button>
+  <div id="status">Choose a mode</div>
 
-    </div>
+  <div id="manualBox" class="hidden">
+    <select id="countrySelect"></select>
+    <button id="loadManual" class="bigBtn smallBtn">Load Weather</button>
+  </div>
 
-    <div id="status">Choose a mode</div>
+  <div id="loader" class="hidden"></div>
 
-    <!-- MANUAL -->
-    <div id="manualBox" class="hidden">
-      <select id="countrySelect"></select>
-      <button id="loadManual" class="bigBtn smallBtn">Load Weather</button>
-    </div>
+  <div id="mainCard" class="glass hidden">
+    <div id="bigTemp">--°</div>
+    <div id="conditionText">--</div>
+  </div>
 
-    <div id="loader" class="hidden"></div>
+  <div id="cards" class="grid hidden">
 
-    <!-- HERO -->
-    <div id="mainCard" class="glass hidden">
-      <div id="bigTemp">--°</div>
-      <div id="conditionText">--</div>
-    </div>
+    <div class="card">🌡️ Temperature: <span id="temp"></span></div>
+    <div class="card">🤗 Feels Like: <span id="feels"></span></div>
+    <div class="card">☀️ UV Index: <span id="uv"></span></div>
+    <div class="card">💨 Wind: <span id="wind"></span></div>
+    <div class="card">💧 Humidity: <span id="hum"></span></div>
+    <div class="card">👁️ Visibility: <span id="vis"></span></div>
 
-    <!-- CARDS -->
-    <div id="cards" class="grid hidden">
+    <div class="card wide" id="sun"></div>
 
-      <div class="card">🌡️ Temperature: <span id="temp"></span></div>
-      <div class="card">🤗 Feels Like: <span id="feels"></span></div>
-      <div class="card">☀️ UV Index: <span id="uv"></span></div>
-      <div class="card">💨 Wind: <span id="wind"></span></div>
-      <div class="card">💧 Humidity: <span id="hum"></span></div>
-      <div class="card">👁️ Visibility: <span id="vis"></span></div>
+  </div>
 
-      <div class="card wide" id="sun"></div>
+  <!-- MAP CONTROLS (FLOATING) -->
+  <div id="mapControls" class="mapControls hidden">
+    <button id="mapToggle" class="miniBtn">⤢ Expand</button>
+    <button id="mapClose" class="miniBtn danger">✕ Close</button>
+  </div>
 
-    </div>
-
-    <!-- MAP CONTROLS -->
-    <div class="mapControls">
-
-      <button id="mapToggle" class="bigBtn smallBtn">🗺️ Expand Map</button>
-
-      <button id="mapClose" class="bigBtn smallBtn danger hidden">❌ Close Map</button>
-
-    </div>
-
-    <!-- MAP -->
-    <div id="mapContainer" class="mapBox">
-      <div id="map"></div>
-    </div>
-
+  <!-- MAP -->
+  <div id="mapContainer" class="mapBox">
+    <div id="map"></div>
   </div>
 
 </div>
