@@ -1,7 +1,7 @@
-console.log("SkyNow restored script loaded");
+console.log("SkyNow SAFE restore loaded");
 
 /* =========================
-   ELEMENTS (YOUR ORIGINAL UI)
+   DO NOT TOUCH UI (ONLY LOGIC)
 ========================= */
 
 const intro = document.getElementById("intro");
@@ -13,17 +13,10 @@ const mapPick = document.getElementById("mapPick");
 
 const viewingText = document.getElementById("viewingText");
 
-const temp = document.getElementById("temp");
-const feels = document.getElementById("feels");
-const uv = document.getElementById("uv");
-const wind = document.getElementById("wind");
-const hum = document.getElementById("hum");
-const vis = document.getElementById("vis");
-
 let map;
 
 /* =========================
-   🚀 INTRO (FIXED ONLY)
+   🚀 INTRO (ONLY FIX, NO UI CHANGE)
 ========================= */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -34,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* =========================
-   🗺️ MAP (UNCHANGED LOGIC)
+   🗺️ MAP (UNCHANGED)
 ========================= */
 
 function initMap(lat, lon) {
@@ -51,11 +44,12 @@ function initMap(lat, lon) {
 }
 
 /* =========================
-   🌦️ WEATHER (SAFE FIX ONLY)
+   🌦️ WEATHER (SAFE ONLY)
 ========================= */
 
 async function getWeather(lat, lon) {
   try {
+
     const url =
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
       "&hourly=temperature_2m,uv_index,wind_speed_10m,relative_humidity_2m,visibility,apparent_temperature" +
@@ -86,7 +80,8 @@ async function getWeather(lat, lon) {
     };
 
   } catch (e) {
-    console.error("Weather error", e);
+    console.error(e);
+
     return {
       temp: "--",
       feels: "--",
@@ -99,7 +94,7 @@ async function getWeather(lat, lon) {
 }
 
 /* =========================
-   🌍 LOAD WEATHER (UI SAME)
+   🌍 LOAD WEATHER (NO UI CHANGES)
 ========================= */
 
 async function loadWeather(lat, lon, name) {
@@ -115,16 +110,17 @@ async function loadWeather(lat, lon, name) {
 
   const w = await getWeather(lat, lon);
 
-  if (temp) temp.textContent = w.temp;
-  if (feels) feels.textContent = w.feels;
-  if (uv) uv.textContent = w.uv;
-  if (wind) wind.textContent = w.wind;
-  if (hum) hum.textContent = w.hum;
-  if (vis) vis.textContent = w.vis;
+  // OLD UI ELEMENTS ONLY (no redesign)
+  document.getElementById("temp").textContent = w.temp;
+  document.getElementById("feels").textContent = w.feels;
+  document.getElementById("uv").textContent = w.uv;
+  document.getElementById("wind").textContent = w.wind;
+  document.getElementById("hum").textContent = w.hum;
+  document.getElementById("vis").textContent = w.vis;
 }
 
 /* =========================
-   📍 BUTTONS (NOW ALL WORK)
+   📍 BUTTONS (FIX ONLY)
 ========================= */
 
 useLocation?.addEventListener("click", () => {
@@ -136,20 +132,19 @@ useLocation?.addEventListener("click", () => {
   );
 });
 
-/* 🌍 MANUAL BACK (SIMPLE PROMPT — NO UI BREAK) */
+/* 🌍 MANUAL (KEEPS OLD SIMPLE STYLE) */
 manualSelect?.addEventListener("click", () => {
-  const lat = prompt("Latitude:");
-  const lon = prompt("Longitude:");
-  const name = prompt("Name:");
+  const lat = prompt("Enter latitude:");
+  const lon = prompt("Enter longitude:");
+  const name = prompt("Enter name:");
 
   if (!lat || !lon) return;
 
-  loadWeather(parseFloat(lat), parseFloat(lon), name || "Manual Location");
+  loadWeather(parseFloat(lat), parseFloat(lon), name || "Manual");
 });
 
 /* 🗺️ MAP MODE */
 mapPick?.addEventListener("click", () => {
   modeScreen.style.display = "none";
-
   loadWeather(35.1856, 33.3823, "Map Mode");
 });
