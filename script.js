@@ -1,16 +1,19 @@
 
-const startBtn = document.getElementById("startBtn");
-const manualBtn = document.getElementById("manualBtn");
-const mapSelectBtn = document.getElementById("mapSelectBtn");
+const intro = document.getElementById("intro");
+const app = document.getElementById("app");
+
+const modeScreen = document.getElementById("modeScreen");
+const dashboard = document.getElementById("dashboard");
+
+const useLocation = document.getElementById("useLocation");
+const manual = document.getElementById("manual");
+const mapMode = document.getElementById("mapMode");
 
 const manualBox = document.getElementById("manualBox");
 const countrySelect = document.getElementById("countrySelect");
-const loadManual = document.getElementById("loadManual");
+const loadCountry = document.getElementById("loadCountry");
 
-const status = document.getElementById("status");
-const loader = document.getElementById("loader");
-
-const card = document.getElementById("card");
+const locationText = document.getElementById("locationText");
 
 const temp = document.getElementById("temp");
 const feels = document.getElementById("feels");
@@ -19,43 +22,36 @@ const wind = document.getElementById("wind");
 const hum = document.getElementById("hum");
 const vis = document.getElementById("vis");
 
-const bigTemp = document.getElementById("bigTemp");
-const conditionText = document.getElementById("conditionText");
-
-const bg = document.getElementById("bg");
+const tempBig = document.getElementById("tempBig");
+const condition = document.getElementById("condition");
 
 const mapBox = document.getElementById("mapBox");
-const mapExpand = document.getElementById("mapExpand");
-const mapMinimise = document.getElementById("mapMinimise");
+const expand = document.getElementById("expand");
+const minimise = document.getElementById("minimise");
 
 let map;
-let selectMode = false;
+let selectedName = "";
+
+/* INTRO */
+setTimeout(()=>{
+  intro.style.display="none";
+  app.classList.remove("hidden");
+},1500);
 
 /* COUNTRIES */
-const locations = [
+const countries = [
   {name:"Cyprus",lat:35.1856,lon:33.3823},
   {name:"Greece",lat:37.9838,lon:23.7275},
   {name:"UK",lat:51.5072,lon:-0.1276},
   {name:"USA",lat:40.7128,lon:-74.0060}
 ];
 
-locations.forEach(l=>{
+countries.forEach(c=>{
   const o=document.createElement("option");
-  o.value=JSON.stringify(l);
-  o.textContent=l.name;
+  o.value=JSON.stringify(c);
+  o.textContent=c.name;
   countrySelect.appendChild(o);
 });
-
-/* BACKGROUND */
-function setBg(code){
-  if(code<=3){
-    bg.style.background="linear-gradient(#4facfe,#00f2fe)";
-  } else if(code<=60){
-    bg.style.background="linear-gradient(#555,#999)";
-  } else {
-    bg.style.background="linear-gradient(#111,#000)";
-  }
-}
 
 /* MAP */
 function initMap(lat,lon){
@@ -68,9 +64,7 @@ function initMap(lat,lon){
   .addTo(map);
 
   map.on("click",(e)=>{
-    if(selectMode){
-      loadWeather(e.latlng.lat,e.latlng.lng);
-    }
+    loadWeather(e.latlng.lat,e.latlng.lng,"Map Location");
   });
 }
 
@@ -85,8 +79,8 @@ async function getWeather(lat,lon){
   const res = await fetch(url);
   const data = await res.json();
 
-  const now = new Date();
   let i=0,best=999999;
+  const now=new Date();
 
   for(let x=0;x<data.hourly.time.length;x++){
     let d=Math.abs(new Date(data.hourly.time[x]) - now);
@@ -104,20 +98,23 @@ async function getWeather(lat,lon){
   };
 }
 
-/* LOAD */
-async function loadWeather(lat,lon){
+/* LOAD WEATHER */
+async function loadWeather(lat,lon,name){
 
-  loader.classList.remove("hidden");
+  selectedName = name;
+
+  locationText.textContent = "🌍 Viewing: " + name;
+
+  dashboard.classList.remove("hidden");
+  modeScreen.classList.add("hidden");
 
   if(!map){
     initMap(lat,lon);
+  } else {
+    map.setView([lat,lon],7);
   }
 
   const w = await getWeather(lat,lon);
-
-  loader.classList.add("hidden");
-
-  card.classList.remove("hidden");
 
   temp.textContent=w.temp;
   feels.textContent=w.feels;
@@ -126,44 +123,45 @@ async function loadWeather(lat,lon){
   hum.textContent=w.hum;
   vis.textContent=w.vis;
 
-  bigTemp.textContent=w.temp+"°";
-  conditionText.textContent="Weather";
-
-  setBg(w.code);
+  tempBig.textContent=w.temp+"°";
+  condition.textContent="Weather";
 }
 
 /* BUTTONS */
-startBtn.onclick=()=>{
+useLocation.onclick=()=>{
   navigator.geolocation.getCurrentPosition(p=>{
-    loadWeather(p.coords.latitude,p.coords.longitude);
+    loadWeather(p.coords.latitude,p.coords.longitude,"Your Location");
   });
 };
 
-manualBtn.onclick=()=>{
+manual.onclick=()=>{
   manualBox.classList.toggle("hidden");
 };
 
-loadManual.onclick=()=>{
-  const l=JSON.parse(countrySelect.value);
-  loadWeather(l.lat,l.lon);
+loadCountry.onclick=()=>{
+  const c=JSON.parse(countrySelect.value);
+  loadWeather(c.lat,c.lon,c.name);
 };
 
-mapSelectBtn.onclick=()=>{
-  selectMode=true;
-  status.textContent="Tap map to choose";
+mapMode.onclick=()=>{
+  modeScreen.classList.add("hidden");
+  dashboard.classList.remove("hidden");
+
+  const c=countries[0];
+  loadWeather(c.lat,c.lon,"Map Mode");
 };
 
 /* MAP EXPAND */
-mapExpand.onclick=()=>{
+expand.onclick=()=>{
   mapBox.classList.add("expanded");
-  mapMinimise.classList.remove("hidden");
-  mapExpand.classList.add("hidden");
+  minimise.classList.remove("hidden");
+  expand.classList.add("hidden");
   setTimeout(()=>map.invalidateSize(),200);
 };
 
-mapMinimise.onclick=()=>{
+minimise.onclick=()=>{
   mapBox.classList.remove("expanded");
-  mapMinimise.classList.add("hidden");
-  mapExpand.classList.remove("hidden");
+  minimise.classList.add("hidden");
+  expand.classList.remove("hidden");
   setTimeout(()=>map.invalidateSize(),200);
 };
