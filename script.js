@@ -1,188 +1,154 @@
-const startBtn = document.getElementById("startBtn");
-const manualBtn = document.getElementById("manualBtn");
-const loadManual = document.getElementById("loadManual");
-
-const manualBox = document.getElementById("manualBox");
-const countrySelect = document.getElementById("countrySelect");
-
-const status = document.getElementById("status");
-const loader = document.getElementById("loader");
-
-const mainCard = document.getElementById("mainCard");
-const cards = document.getElementById("cards");
-
-const bigTemp = document.getElementById("bigTemp");
-const conditionText = document.getElementById("conditionText");
-
-const temp = document.getElementById("temp");
-const feels = document.getElementById("feels");
-const uv = document.getElementById("uv");
-const wind = document.getElementById("wind");
-const hum = document.getElementById("hum");
-const vis = document.getElementById("vis");
-const sun = document.getElementById("sun");
-
-const bg = document.getElementById("bg");
-const mainScreen = document.getElementById("mainScreen");
-
-let map;
-
-/* 🌍 COUNTRIES */
-const locations = [
-  {name:"Cyprus", lat:35.1856, lon:33.3823},
-  {name:"Greece", lat:37.9838, lon:23.7275},
-  {name:"UK", lat:51.5072, lon:-0.1276},
-  {name:"France", lat:48.8566, lon:2.3522},
-  {name:"USA", lat:40.7128, lon:-74.0060},
-  {name:"Japan", lat:35.6762, lon:139.6503},
-  {name:"Australia", lat:-35.2809, lon:149.1300},
-  {name:"India", lat:28.6139, lon:77.2090},
-  {name:"Brazil", lat:-15.8267, lon:-47.9218}
-];
-
-locations.forEach(l=>{
-  const o = document.createElement("option");
-  o.value = JSON.stringify(l);
-  o.textContent = l.name;
-  countrySelect.appendChild(o);
-});
-
-/* WEATHER TEXT */
-function weatherText(code){
-  if(code === 0) return "Clear Sky";
-  if(code <= 3) return "Cloudy";
-  if(code <= 48) return "Fog";
-  if(code <= 67) return "Rain";
-  if(code <= 82) return "Showers";
-  return "Storm";
+body {
+  margin: 0;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  color: white;
+  overflow-x: hidden;
 }
 
-/* BACKGROUND */
-function setBackground(code){
-  let g;
+/* 🌈 BACKGROUND */
+#bg {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  transition: background 1.2s ease;
+}
 
-  if(code === 0) g = "linear-gradient(180deg,#4facfe,#00f2fe)";
-  else if(code <= 3) g = "linear-gradient(180deg,#8e9eab,#eef2f3)";
-  else if(code <= 48) g = "linear-gradient(180deg,#2c2c2c,#111)";
-  else if(code <= 67) g = "linear-gradient(180deg,#314755,#26a0da)";
-  else g = "linear-gradient(180deg,#0f2027,#203a43,#2c5364)";
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.25);
+  z-index: -1;
+}
 
-  bg.style.background = g;
+/* 🌟 SCREEN */
+.screen {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s ease;
+}
+
+.screen.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 🌟 WELCOME */
+#welcome {
+  position: fixed;
+  inset: 0;
+  background: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  animation: fadeOut 1s ease forwards;
+  animation-delay: 1.5s;
+}
+
+.welcomeCard {
+  text-align: center;
+  animation: pop 1s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+
+/* APP */
+.app {
+  padding: 20px;
+  text-align: center;
+}
+
+/* 🌟 BIG WOW BUTTONS */
+.bigBtn {
+  width: 90%;
+  max-width: 320px;
+  padding: 18px;
+  margin: 10px auto;
+  font-size: 18px;
+  font-weight: 700;
+  border-radius: 18px;
+  border: none;
+  color: white;
+  background: linear-gradient(135deg,#4facfe,#00f2fe);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: block;
+}
+
+.bigBtn.secondary {
+  background: linear-gradient(135deg,#667eea,#764ba2);
+}
+
+.bigBtn:active {
+  transform: scale(0.96);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* GLASS */
+.glass {
+  background: rgba(255,255,255,0.10);
+  backdrop-filter: blur(22px);
+  border-radius: 28px;
+  padding: 22px;
+  margin: 16px 0;
+}
+
+/* HERO */
+#bigTemp {
+  font-size: 72px;
+  font-weight: 700;
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.card {
+  background: rgba(255,255,255,0.08);
+  backdrop-filter: blur(18px);
+  border-radius: 18px;
+  padding: 14px;
 }
 
 /* MAP */
-function loadMap(lat,lon){
-  if(map) map.remove();
-
-  map = L.map("map").setView([lat,lon], 7);
-
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
-    .addTo(map);
-
-  L.marker([lat,lon]).addTo(map);
+#map {
+  height: 220px;
+  border-radius: 16px;
 }
 
-/* API */
-async function getWeather(lat,lon){
-
-  const url =
-    "https://api.open-meteo.com/v1/forecast" +
-    `?latitude=${lat}&longitude=${lon}` +
-    "&hourly=temperature_2m,uv_index,wind_speed_10m,relative_humidity_2m,visibility,apparent_temperature,weather_code" +
-    "&daily=sunrise,sunset&timezone=auto";
-
-  const res = await fetch(url);
-  const data = await res.json();
-
-  const now = new Date();
-  const times = data.hourly.time;
-
-  let i = 0;
-  let best = Infinity;
-
-  for(let x=0;x<times.length;x++){
-    const d = Math.abs(new Date(times[x]) - now);
-    if(d < best){ best = d; i = x; }
-  }
-
-  return {
-    temp: data.hourly.temperature_2m[i],
-    feels: data.hourly.apparent_temperature[i],
-    uv: data.hourly.uv_index[i],
-    wind: data.hourly.wind_speed_10m[i],
-    hum: data.hourly.relative_humidity_2m[i],
-    vis: data.hourly.visibility[i],
-    code: data.hourly.weather_code[i],
-    sunrise: data.daily.sunrise[0],
-    sunset: data.daily.sunset[0]
-  };
+/* SELECT */
+select {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,0.12);
+  color: white;
+  border: none;
 }
 
-/* GPS */
-function getLocation(){
-  return new Promise(r=>{
-    navigator.geolocation.getCurrentPosition(p=>r(p),()=>r(null));
-  });
+/* LOADER */
+#loader {
+  width: 44px;
+  height: 44px;
+  border: 4px solid rgba(255,255,255,0.2);
+  border-top: 4px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
 }
 
-/* LOAD WEATHER */
-async function loadWeather(lat,lon){
-
-  loader.classList.remove("hidden");
-  status.textContent = "Loading...";
-
-  loadMap(lat,lon);
-
-  const w = await getWeather(lat,lon);
-
-  loader.classList.add("hidden");
-  status.style.display = "none";
-
-  mainCard.classList.remove("hidden");
-  cards.classList.remove("hidden");
-
-  bigTemp.textContent = `${w.temp}°`;
-  conditionText.textContent = weatherText(w.code);
-
-  temp.textContent = `Temperature: ${w.temp}°C`;
-  feels.textContent = `Feels Like: ${w.feels}°C`;
-  uv.textContent = `UV Index: ${w.uv}`;
-  wind.textContent = `Wind: ${w.wind} km/h`;
-  hum.textContent = `Humidity: ${w.hum}%`;
-  vis.textContent = `Visibility: ${w.vis} m`;
-
-  sun.innerHTML =
-    `Sunrise: ${w.sunrise.split("T")[1]}<br>`+
-    `Sunset: ${w.sunset.split("T")[1]}`;
-
-  setBackground(w.code);
-
-  mainScreen.classList.add("show");
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-/* BUTTONS */
-startBtn.onclick = async ()=>{
-  const p = await getLocation();
-
-  let lat = p ? p.coords.latitude : 35.1856;
-  let lon = p ? p.coords.longitude : 33.3823;
-
-  loadWeather(lat,lon);
-};
-
-manualBtn.onclick = ()=>{
-  manualBox.classList.toggle("hidden");
-};
-
-loadManual.onclick = ()=>{
-  const l = JSON.parse(countrySelect.value);
-  loadWeather(l.lat,l.lon);
-};
-
-/* WELCOME */
-window.addEventListener("load",()=>{
-  setTimeout(()=>{
-    document.getElementById("welcome").style.display = "none";
-    mainScreen.classList.add("show");
-  },1600);
-});
+.hidden { display:none; }
