@@ -6,7 +6,6 @@
 <title>Weather Pro+</title>
 
 <link rel="stylesheet" href="style.css"/>
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 </head>
@@ -19,11 +18,20 @@
 
   <div class="title">🌤 Weather Pro+</div>
 
-  <button id="startBtn">Get Weather</button>
+  <button id="startBtn">Use My Location</button>
+  <button id="manualBtn">Pick Country Manually</button>
 
-  <div id="status">Tap to start</div>
+  <div id="status">Choose a mode</div>
 
-  <!-- 🔄 LOADING SPINNER -->
+  <!-- 🌍 MANUAL PICKER -->
+  <div id="manualBox" class="hidden">
+
+    <select id="countrySelect"></select>
+    <button id="loadCountry">Load Weather</button>
+
+  </div>
+
+  <!-- 🔄 LOADER -->
   <div id="loader" class="loader hidden"></div>
 
   <div id="card" class="hidden">
