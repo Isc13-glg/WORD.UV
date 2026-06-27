@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>SkyNow</title>
 
@@ -11,65 +11,72 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<div id="bg"></div>
-
-<div class="app">
-
-<h1 class="title">SkyNow</h1>
-
-<!-- MENU -->
-<div class="menu">
-
-  <button id="startBtn">📍 Location</button>
-  <button id="manualBtn">🌍 Manual</button>
-  <button id="mapSelectBtn">🗺️ Pick Map</button>
-
+<!-- INTRO -->
+<div id="intro">
+  <div class="logo">☁️ SkyNow</div>
+  <div class="loader"></div>
 </div>
 
-<div id="status">Choose a mode</div>
+<!-- APP -->
+<div id="app" class="hidden">
 
-<!-- MANUAL -->
-<div id="manualBox" class="hidden">
-  <select id="countrySelect"></select>
-  <button id="loadManual">Load</button>
-</div>
+  <!-- MODE SELECT -->
+  <div id="modeScreen">
 
-<!-- LOADER -->
-<div id="loader" class="hidden"></div>
+    <h1>Choose Mode</h1>
 
-<!-- WEATHER CARD -->
-<div id="card" class="glass hidden">
+    <button id="useLocation">📍 Use My Location</button>
+    <button id="manual">🌍 Manual Select</button>
+    <button id="mapMode">🗺️ Pick From Map</button>
 
-  <div id="bigTemp">--°</div>
-  <div id="conditionText">--</div>
+    <div id="manualBox" class="hidden">
+      <select id="countrySelect"></select>
+      <button id="loadCountry">Load</button>
+    </div>
 
-  <div class="grid">
-    <div>🌡️ <span id="temp"></span></div>
-    <div>🤗 <span id="feels"></span></div>
-    <div>☀️ <span id="uv"></span></div>
-    <div>💨 <span id="wind"></span></div>
-    <div>💧 <span id="hum"></span></div>
-    <div>👁️ <span id="vis"></span></div>
   </div>
 
-</div>
+  <!-- DASHBOARD -->
+  <div id="dashboard" class="hidden">
 
-<!-- MAP ALWAYS VISIBLE -->
-<div id="mapBox">
+    <div id="locationText">🌍 Viewing: --</div>
 
-  <div id="mapControls">
-    <button id="mapExpand">⤢</button>
-    <button id="mapMinimise" class="hidden">⤡</button>
+    <div id="loader" class="hidden"></div>
+
+    <div class="card">
+
+      <div id="tempBig">--°</div>
+      <div id="condition">--</div>
+
+      <div class="grid">
+        <div>🌡️ <span id="temp"></span></div>
+        <div>🤗 <span id="feels"></span></div>
+        <div>☀️ <span id="uv"></span></div>
+        <div>💨 <span id="wind"></span></div>
+        <div>💧 <span id="hum"></span></div>
+        <div>👁️ <span id="vis"></span></div>
+      </div>
+
+    </div>
+
+    <!-- MAP ALWAYS SMALL -->
+    <div id="mapBox">
+
+      <div id="mapControls">
+        <button id="expand">⤢</button>
+        <button id="minimise" class="hidden">⤡</button>
+      </div>
+
+      <div id="map"></div>
+
+    </div>
+
   </div>
-
-  <div id="map"></div>
-
-</div>
 
 </div>
 
