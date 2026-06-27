@@ -5,12 +5,11 @@ body {
   overflow-x: hidden;
 }
 
-/* 🌈 BACKGROUND */
 #bg {
   position: fixed;
   inset: 0;
   z-index: -2;
-  transition: background 1.2s ease;
+  transition: 1s ease;
 }
 
 body::before {
@@ -27,107 +26,86 @@ body::before {
   text-align: center;
 }
 
-/* TITLE (same style system as buttons/cards) */
 .title {
   font-size: 34px;
   font-weight: 700;
-  margin-bottom: 10px;
-  letter-spacing: -0.5px;
 }
 
-/* 🌟 GLASS BASE (used everywhere now) */
+/* GLASS SYSTEM */
 .glass, .bigBtn, select, #loadManual {
   background: rgba(255,255,255,0.10);
-  backdrop-filter: blur(22px);
+  backdrop-filter: blur(20px);
   border: 1px solid rgba(255,255,255,0.15);
   color: white;
-  border-radius: 22px;
+  border-radius: 20px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.25);
 }
 
-/* 🌟 BUTTONS (NOW MATCH EVERYTHING) */
+/* BUTTONS */
 .controls {
   display: flex;
   flex-direction: column;
-  align-items: center;
   gap: 12px;
-  margin-top: 10px;
 }
 
 .bigBtn {
-  width: 92%;
-  max-width: 360px;
   padding: 18px;
-  font-size: 17px;
+  font-size: 16px;
   font-weight: 600;
-  transition: 0.25s ease;
 }
 
 .bigBtn:active {
   transform: scale(0.97);
-  opacity: 0.85;
 }
 
-/* make BOTH buttons identical style system */
-.bigBtn.secondary {
-  background: rgba(255,255,255,0.08);
-}
-
-/* 🌟 MANUAL BUTTON */
-#loadManual {
-  margin-top: 10px;
-  padding: 14px;
-  width: 60%;
-  font-weight: 600;
-}
-
-/* SELECT */
-select {
-  padding: 12px;
-  margin-top: 10px;
-  width: 80%;
-}
-
-/* HERO CARD */
-.glass {
-  padding: 24px;
-  margin: 18px 0;
-}
-
-/* BIG TEMP */
-#bigTemp {
-  font-size: 74px;
-  font-weight: 700;
-  letter-spacing: -2px;
-}
-
-#conditionText {
-  opacity: 0.8;
-  margin-top: 6px;
-  font-size: 18px;
-}
-
-/* GRID */
+/* CARDS */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-/* WEATHER CARDS */
 .card {
   background: rgba(255,255,255,0.08);
-  backdrop-filter: blur(18px);
-  border-radius: 18px;
-  padding: 14px;
-  font-size: 14px;
-  font-weight: 500;
+  backdrop-filter: blur(15px);
+  border-radius: 16px;
+  padding: 12px;
+}
+
+/* HERO */
+.glass {
+  padding: 24px;
+  margin: 16px 0;
+}
+
+#bigTemp {
+  font-size: 72px;
+  font-weight: 700;
 }
 
 /* MAP */
+.mapBox {
+  transition: 0.5s ease;
+  border-radius: 18px;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
 #map {
   height: 220px;
-  border-radius: 16px;
+  transition: 0.5s ease;
+}
+
+/* EXPANDED MAP */
+.mapBox.expanded {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  border-radius: 0;
+}
+
+.mapBox.expanded #map {
+  height: 100vh;
 }
 
 /* LOADER */
@@ -145,6 +123,8 @@ select {
   to { transform: rotate(360deg); }
 }
 
+.hidden { display:none; }
+
 /* WELCOME */
 #welcome {
   position: fixed;
@@ -161,6 +141,3 @@ select {
 @keyframes fadeOut {
   to { opacity: 0; visibility: hidden; }
 }
-
-/* SAFE */
-.hidden { display: none; }
