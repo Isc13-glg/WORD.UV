@@ -1,10 +1,9 @@
-
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0b1220;
   color: white;
   text-align: center;
-  background: #0b1220;
 }
 
 .bg {
@@ -20,9 +19,8 @@ body {
 }
 
 .title {
-  font-size: 26px;
+  font-size: 24px;
   font-weight: bold;
-  margin-top: 10px;
 }
 
 button {
@@ -33,11 +31,6 @@ button {
   background: white;
   color: black;
   font-weight: bold;
-}
-
-#status {
-  margin-top: 10px;
-  opacity: 0.7;
 }
 
 .hidden {
@@ -53,10 +46,10 @@ button {
 
 .box {
   background: rgba(255,255,255,0.08);
-  padding: 18px;
+  padding: 16px;
   border-radius: 16px;
-  backdrop-filter: blur(12px);
-  font-size: 18px;
+  text-align: left;
+  font-size: 16px;
 }
 
 #msg {
