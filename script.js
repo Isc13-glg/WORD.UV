@@ -27,33 +27,16 @@ const bg = document.getElementById("bg");
 
 let map;
 
-/* 🌍 HUGE COUNTRY LIST */
+/* 🌍 COUNTRIES */
 const locations = [
   {name:"Cyprus",lat:35.1856,lon:33.3823},
   {name:"Greece",lat:37.9838,lon:23.7275},
-  {name:"Turkey",lat:39.9334,lon:32.8597},
   {name:"UK",lat:51.5072,lon:-0.1276},
   {name:"France",lat:48.8566,lon:2.3522},
-  {name:"Germany",lat:52.5200,lon:13.4050},
-  {name:"Italy",lat:41.9028,lon:12.4964},
-  {name:"Spain",lat:40.4168,lon:-3.7038},
-  {name:"Portugal",lat:38.7223,lon:-9.1393},
-  {name:"Netherlands",lat:52.3676,lon:4.9041},
-  {name:"Belgium",lat:50.8503,lon:4.3517},
-  {name:"Switzerland",lat:46.9480,lon:7.4474},
-  {name:"Austria",lat:48.2082,lon:16.3738},
-  {name:"Poland",lat:52.2297,lon:21.0122},
   {name:"USA",lat:40.7128,lon:-74.0060},
-  {name:"Canada",lat:45.4215,lon:-75.6972},
-  {name:"Brazil",lat:-15.8267,lon:-47.9218},
-  {name:"Argentina",lat:-34.6037,lon:-58.3816},
-  {name:"India",lat:28.6139,lon:77.2090},
-  {name:"China",lat:39.9042,lon:116.4074},
   {name:"Japan",lat:35.6762,lon:139.6503},
   {name:"Australia",lat:-35.2809,lon:149.1300},
-  {name:"New Zealand",lat:-41.2865,lon:174.7762},
-  {name:"South Africa",lat:-25.7479,lon:28.2293},
-  {name:"Egypt",lat:30.0444,lon:31.2357}
+  {name:"India",lat:28.6139,lon:77.2090}
 ];
 
 locations.forEach(l=>{
@@ -63,13 +46,12 @@ locations.forEach(l=>{
   countrySelect.appendChild(o);
 });
 
-/* WEATHER TEXT */
+/* WEATHER */
 function weatherText(code){
-  if(code===0) return "Clear Sky";
+  if(code===0) return "Clear";
   if(code<=3) return "Cloudy";
   if(code<=48) return "Fog";
   if(code<=67) return "Rain";
-  if(code<=82) return "Showers";
   return "Storm";
 }
 
@@ -78,8 +60,7 @@ function setBackground(code){
   let g;
   if(code===0) g="linear-gradient(180deg,#4facfe,#00f2fe)";
   else if(code<=3) g="linear-gradient(180deg,#8e9eab,#eef2f3)";
-  else if(code<=48) g="linear-gradient(180deg,#2c2c2c,#111)";
-  else g="linear-gradient(180deg,#0f2027,#203a43,#2c5364)";
+  else g="linear-gradient(180deg,#2c2c2c,#111)";
   bg.style.background=g;
 }
 
@@ -179,9 +160,9 @@ loadManual.onclick=()=>{
   loadWeather(l.lat,l.lon);
 };
 
-/* WELCOME */
+/* WELCOME FIX (IMPORTANT) */
 window.addEventListener("load",()=>{
   setTimeout(()=>{
     document.getElementById("welcome").style.display="none";
-  },1600);
+  },1500);
 });
