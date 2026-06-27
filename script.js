@@ -4,9 +4,13 @@ const status = document.getElementById("status");
 const card = document.getElementById("card");
 
 const tempBox = document.getElementById("temp");
+const feelsBox = document.getElementById("feels");
 const uvBox = document.getElementById("uv");
 const windBox = document.getElementById("wind");
 const humBox = document.getElementById("hum");
+const visBox = document.getElementById("vis");
+const sunBox = document.getElementById("sun");
+const condBox = document.getElementById("cond");
 const msg = document.getElementById("msg");
 
 const alarm = document.getElementById("alarm");
@@ -14,32 +18,31 @@ const alarm = document.getElementById("alarm");
 let map;
 let unlocked = false;
 
-// 🔊 VOICE (iPhone safe)
-function speak(text){
-  const u = new SpeechSynthesisUtterance(text);
+// 🔊 voice
+function speak(t){
+  const u = new SpeechSynthesisUtterance(t);
   u.lang = "en-US";
-  u.rate = 1;
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
 }
 
-// 🌈 UV ICONS
-function uvIcon(u){
-  if(u <= 2) return "☁️";
-  if(u <= 5) return "⛅";
-  if(u <= 7) return "🌤️";
-  return "☀️🔥";
+// 💨 wind direction
+function windDir(deg){
+  const dirs = ["N","NE","E","SE","S","SW","W","NW"];
+  return dirs[Math.round(deg/45)%8];
 }
 
-// ☀️ UV TEXT
-function uvText(u){
-  if(u <= 2) return "Low UV";
-  if(u <= 5) return "Moderate UV";
-  if(u <= 7) return "High UV";
-  return "Extreme UV";
+// ☁️ weather code
+function condition(code){
+  if(code===0) return "Clear sky ☀️";
+  if(code<=3) return "Cloudy ⛅";
+  if(code<=48) return "Fog 🌫️";
+  if(code<=67) return "Rain 🌧️";
+  if(code<=82) return "Showers 🌦️";
+  return "Storm ⛈️";
 }
 
-// 🔊 ALARM
+// 🔊 alarm
 function playAlarm(uv){
   if(uv >= 6.5 && unlocked){
     alarm.currentTime = 0;
@@ -47,15 +50,12 @@ function playAlarm(uv){
   }
 }
 
-// 🗺️ FIX MAP (NO GRAY SCREEN BUG)
+// 🗺 map fix
 function loadMap(lat,lon){
 
   setTimeout(()=>{
 
-    if(map){
-      map.remove();
-      map = null;
-    }
+    if(map) map.remove();
 
     map = L.map("map").setView([lat,lon], 7);
 
@@ -70,11 +70,14 @@ function loadMap(lat,lon){
   },300);
 }
 
-// 🌍 WEATHER API
+// 🌍 WEATHER API (FULL)
 async function getWeather(lat,lon){
 
   const url =
-  `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,uv_index,wind_speed_10m,relative_humidity_2m&timezone=auto`;
+  `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}
+  &hourly=temperature_2m,uv_index,wind_speed_10m,wind_direction_10m,relative_humidity_2m,visibility,apparent_temperature,weather_code
+  &daily=sunrise,sunset
+  &timezone=auto`;
 
   const res = await fetch(url);
   const data = await res.json();
@@ -82,23 +85,28 @@ async function getWeather(lat,lon){
   const now = new Date();
   const times = data.hourly.time;
 
-  let i = 0;
-  let best = 999999;
+  let i=0, best=999999;
 
   for(let x=0;x<times.length;x++){
     const d = Math.abs(new Date(times[x]) - now);
-    if(d < best){ best = d; i = x; }
+    if(d<best){ best=d; i=x; }
   }
 
   return {
     temp: data.hourly.temperature_2m[i],
+    feels: data.hourly.apparent_temperature[i],
     uv: data.hourly.uv_index[i],
     wind: data.hourly.wind_speed_10m[i],
-    hum: data.hourly.relative_humidity_2m[i]
+    windDir: data.hourly.wind_direction_10m[i],
+    hum: data.hourly.relative_humidity_2m[i],
+    vis: data.hourly.visibility[i],
+    code: data.hourly.weather_code[i],
+    sunrise: data.daily.sunrise[0],
+    sunset: data.daily.sunset[0]
   };
 }
 
-// 🚀 START BUTTON (FIXED)
+// 🚀 START
 startBtn.onclick = () => {
 
   unlocked = true;
@@ -116,20 +124,24 @@ startBtn.onclick = () => {
     card.classList.remove("hidden");
     status.style.display = "none";
 
-    tempBox.innerHTML = `🌡️ Temp: <b>${w.temp}°C</b>`;
-    uvBox.innerHTML = `${uvIcon(w.uv)} UV: <b>${w.uv}</b>`;
-    windBox.innerHTML = `💨 Wind: <b>${w.wind} km/h</b>`;
-    humBox.innerHTML = `💧 Humidity: <b>${w.hum}%</b>`;
+    tempBox.textContent = `🌡️ Temp: ${w.temp}°C`;
+    feelsBox.textContent = `🤗 Feels: ${w.feels}°C`;
+    uvBox.textContent = `☀️ UV: ${w.uv}`;
+    windBox.textContent = `💨 Wind: ${w.wind} km/h (${windDir(w.windDir)})`;
+    humBox.textContent = `💧 Humidity: ${w.hum}%`;
+    visBox.textContent = `👁️ Visibility: ${w.vis} m`;
 
-    msg.textContent = uvText(w.uv);
+    sunBox.innerHTML =
+      `🌅 Sunrise: ${w.sunrise.split("T")[1]}<br>🌇 Sunset: ${w.sunset.split("T")[1]}`;
 
-    speak(`Temperature is ${w.temp} degrees. UV is ${w.uv}`);
+    condBox.textContent = `☁️ ${condition(w.code)}`;
+
+    msg.textContent = condition(w.code);
+
+    speak(`Weather is ${condition(w.code)}. Temperature is ${w.temp} degrees.`);
 
     playAlarm(w.uv);
 
-  },
-  err => {
-    status.textContent = "Location blocked or unavailable";
   });
 
 };
