@@ -1,4 +1,3 @@
-
 const startBtn = document.getElementById("startBtn");
 const manualBtn = document.getElementById("manualBtn");
 const loadManual = document.getElementById("loadManual");
@@ -24,16 +23,21 @@ const vis = document.getElementById("vis");
 const sun = document.getElementById("sun");
 
 const bg = document.getElementById("bg");
+const mainScreen = document.getElementById("mainScreen");
 
 let map;
 
-/* 🌍 locations */
+/* 🌍 COUNTRIES */
 const locations = [
   {name:"Cyprus", lat:35.1856, lon:33.3823},
-  {name:"London", lat:51.5072, lon:-0.1276},
-  {name:"Paris", lat:48.8566, lon:2.3522},
-  {name:"Tokyo", lat:35.6762, lon:139.6503},
-  {name:"New York", lat:40.7128, lon:-74.0060}
+  {name:"Greece", lat:37.9838, lon:23.7275},
+  {name:"UK", lat:51.5072, lon:-0.1276},
+  {name:"France", lat:48.8566, lon:2.3522},
+  {name:"USA", lat:40.7128, lon:-74.0060},
+  {name:"Japan", lat:35.6762, lon:139.6503},
+  {name:"Australia", lat:-35.2809, lon:149.1300},
+  {name:"India", lat:28.6139, lon:77.2090},
+  {name:"Brazil", lat:-15.8267, lon:-47.9218}
 ];
 
 locations.forEach(l=>{
@@ -43,37 +47,30 @@ locations.forEach(l=>{
   countrySelect.appendChild(o);
 });
 
-/* 🌤 weather text */
+/* WEATHER TEXT */
 function weatherText(code){
   if(code === 0) return "Clear Sky";
-  if(code <= 3) return "Clouds";
+  if(code <= 3) return "Cloudy";
   if(code <= 48) return "Fog";
   if(code <= 67) return "Rain";
   if(code <= 82) return "Showers";
   return "Storm";
 }
 
-/* 🌈 background */
+/* BACKGROUND */
 function setBackground(code){
-
   let g;
 
-  if(code === 0){
-    g = "linear-gradient(180deg,#4facfe,#00f2fe)";
-  } else if(code <= 3){
-    g = "linear-gradient(180deg,#8e9eab,#eef2f3)";
-  } else if(code <= 48){
-    g = "linear-gradient(180deg,#3a3a3a,#1c1c1c)";
-  } else if(code <= 67){
-    g = "linear-gradient(180deg,#314755,#26a0da)";
-  } else {
-    g = "linear-gradient(180deg,#0f2027,#203a43,#2c5364)";
-  }
+  if(code === 0) g = "linear-gradient(180deg,#4facfe,#00f2fe)";
+  else if(code <= 3) g = "linear-gradient(180deg,#8e9eab,#eef2f3)";
+  else if(code <= 48) g = "linear-gradient(180deg,#2c2c2c,#111)";
+  else if(code <= 67) g = "linear-gradient(180deg,#314755,#26a0da)";
+  else g = "linear-gradient(180deg,#0f2027,#203a43,#2c5364)";
 
   bg.style.background = g;
 }
 
-/* 🗺 map */
+/* MAP */
 function loadMap(lat,lon){
   if(map) map.remove();
 
@@ -85,16 +82,14 @@ function loadMap(lat,lon){
   L.marker([lat,lon]).addTo(map);
 }
 
-/* 🌍 API */
+/* API */
 async function getWeather(lat,lon){
 
   const url =
     "https://api.open-meteo.com/v1/forecast" +
-    `?latitude=${lat}` +
-    `&longitude=${lon}` +
+    `?latitude=${lat}&longitude=${lon}` +
     "&hourly=temperature_2m,uv_index,wind_speed_10m,relative_humidity_2m,visibility,apparent_temperature,weather_code" +
-    "&daily=sunrise,sunset" +
-    "&timezone=auto";
+    "&daily=sunrise,sunset&timezone=auto";
 
   const res = await fetch(url);
   const data = await res.json();
@@ -123,14 +118,14 @@ async function getWeather(lat,lon){
   };
 }
 
-/* 📍 GPS */
+/* GPS */
 function getLocation(){
   return new Promise(r=>{
-    navigator.geolocation.getCurrentPosition(p=>r(p), ()=>r(null));
+    navigator.geolocation.getCurrentPosition(p=>r(p),()=>r(null));
   });
 }
 
-/* 🚀 LOAD */
+/* LOAD WEATHER */
 async function loadWeather(lat,lon){
 
   loader.classList.remove("hidden");
@@ -157,13 +152,15 @@ async function loadWeather(lat,lon){
   vis.textContent = `Visibility: ${w.vis} m`;
 
   sun.innerHTML =
-    `Sunrise: ${w.sunrise.split("T")[1]}<br>` +
+    `Sunrise: ${w.sunrise.split("T")[1]}<br>`+
     `Sunset: ${w.sunset.split("T")[1]}`;
 
   setBackground(w.code);
+
+  mainScreen.classList.add("show");
 }
 
-/* 📍 GPS */
+/* BUTTONS */
 startBtn.onclick = async ()=>{
   const p = await getLocation();
 
@@ -173,7 +170,6 @@ startBtn.onclick = async ()=>{
   loadWeather(lat,lon);
 };
 
-/* 🌍 manual */
 manualBtn.onclick = ()=>{
   manualBox.classList.toggle("hidden");
 };
@@ -183,10 +179,10 @@ loadManual.onclick = ()=>{
   loadWeather(l.lat,l.lon);
 };
 
-/* 🟢 remove welcome screen */
-window.addEventListener("load", ()=>{
+/* WELCOME */
+window.addEventListener("load",()=>{
   setTimeout(()=>{
-    const w = document.getElementById("welcome");
-    if(w) w.style.display = "none";
-  }, 1600);
+    document.getElementById("welcome").style.display = "none";
+    mainScreen.classList.add("show");
+  },1600);
 });
