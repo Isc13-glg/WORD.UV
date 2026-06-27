@@ -1,53 +1,37 @@
+
 const startBtn = document.getElementById("startBtn");
 const status = document.getElementById("status");
-const result = document.getElementById("result");
-const weatherBox = document.getElementById("weatherBox");
+const card = document.getElementById("card");
+
+const tempBox = document.getElementById("tempBox");
 const uvBox = document.getElementById("uvBox");
-const msg = document.getElementById("msg");
+const windBox = document.getElementById("windBox");
+const humidBox = document.getElementById("humidBox");
+const message = document.getElementById("message");
+
 const alarm = document.getElementById("alarm");
 
 let map;
 let unlocked = false;
 
----
-
-# 🔊 VOICE (FIXED FOR IPHONE + CHROME)
-
+// 🔊 voice
 function speak(text){
   const u = new SpeechSynthesisUtterance(text);
   u.lang = "en-US";
   u.rate = 1;
-
   speechSynthesis.cancel();
   speechSynthesis.speak(u);
 }
 
----
-
-# ☀️ UV MESSAGE
-
-function uvMessage(uv){
-  if(uv <= 2) return "Low UV – Safe";
-  if(uv <= 5) return "Moderate UV";
-  if(uv <= 7) return "High UV – Be careful";
-  return "Extreme UV – Avoid sun";
+// ☀️ UV message
+function uvMsg(u){
+  if(u <= 2) return "Low UV";
+  if(u <= 5) return "Moderate UV";
+  if(u <= 7) return "High UV";
+  return "Extreme UV";
 }
 
----
-
-# 🌤️ WEATHER MESSAGE
-
-function weatherMessage(temp){
-  if(temp < 10) return "Cold";
-  if(temp < 20) return "Mild";
-  if(temp < 30) return "Warm";
-  return "Hot";
-}
-
----
-
-# 🔊 ALARM (ONLY UV ≥ 6.5)
-
+// 🔊 alarm
 function playAlarm(uv){
   if(uv >= 6.5 && unlocked){
     alarm.currentTime = 0;
@@ -55,10 +39,7 @@ function playAlarm(uv){
   }
 }
 
----
-
-# 🗺️ FIXED MAP (NO GREY BUG)
-
+// 🗺️ FIXED MAP (NO GREY BUG)
 function loadMap(lat,lon){
 
   setTimeout(() => {
@@ -68,7 +49,7 @@ function loadMap(lat,lon){
       map = null;
     }
 
-    map = L.map("map").setView([lat,lon], 6);
+    map = L.map("map").setView([lat,lon], 7);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution:"© OpenStreetMap"
@@ -76,19 +57,16 @@ function loadMap(lat,lon){
 
     L.marker([lat,lon]).addTo(map);
 
-    setTimeout(() => map.invalidateSize(true), 500);
+    setTimeout(() => map.invalidateSize(true), 600);
 
   }, 300);
 }
 
----
-
-# 🌍 WEATHER + UV FETCH
-
-async function getData(lat,lon){
+// 🌍 REAL WEATHER API
+async function getWeather(lat,lon){
 
   const url =
-  `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,uv_index,cloud_cover&timezone=auto`;
+  `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,uv_index,relative_humidity_2m,wind_speed_10m&timezone=auto`;
 
   const res = await fetch(url);
   const data = await res.json();
@@ -104,21 +82,15 @@ async function getData(lat,lon){
     if(d < best){ best = d; i = x; }
   }
 
-  let temp = data.hourly.temperature_2m[i];
-  let uv = data.hourly.uv_index[i];
-  const cloud = data.hourly.cloud_cover[i] ?? 0;
-
-  uv = uv * (1 - (cloud/100)*0.65);
-  uv = Math.max(0,Math.min(11,uv));
-  uv = Math.round(uv*10)/10;
-
-  return {temp, uv};
+  return {
+    temp: data.hourly.temperature_2m[i],
+    uv: data.hourly.uv_index[i],
+    wind: data.hourly.wind_speed_10m[i],
+    hum: data.hourly.relative_humidity_2m[i]
+  };
 }
 
----
-
-# 🚀 START BUTTON
-
+// 🚀 START
 startBtn.onclick = () => {
 
   unlocked = true;
@@ -132,24 +104,21 @@ startBtn.onclick = () => {
 
     loadMap(lat,lon);
 
-    const {temp, uv} = await getData(lat,lon);
+    const w = await getWeather(lat,lon);
 
-    result.classList.remove("hidden");
-
-    weatherBox.textContent =
-      `🌡️ Temperature: ${temp}°C`;
-
-    uvBox.textContent =
-      `☀️ UV Index: ${uv}`;
-
-    msg.textContent =
-      `${weatherMessage(temp)} | ${uvMessage(uv)}`;
-
-    speak(`Current temperature is ${temp} degrees. UV index is ${uv}`);
-
-    playAlarm(uv);
-
+    card.classList.remove("hidden");
     status.style.display = "none";
+
+    tempBox.textContent = `🌡️ ${w.temp}°C`;
+    uvBox.textContent = `☀️ UV ${w.uv}`;
+    windBox.textContent = `💨 ${w.wind} km/h`;
+    humidBox.textContent = `💧 ${w.hum}%`;
+
+    message.textContent = uvMsg(w.uv);
+
+    speak(`Temperature is ${w.temp} degrees. UV index is ${w.uv}`);
+
+    playAlarm(w.uv);
 
   });
 
