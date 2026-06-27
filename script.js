@@ -1,7 +1,7 @@
-console.log("SkyNow loaded");
+console.log("SkyNow restored script loaded");
 
 /* =========================
-   ELEMENTS (SAFE)
+   ELEMENTS (YOUR ORIGINAL UI)
 ========================= */
 
 const intro = document.getElementById("intro");
@@ -23,28 +23,21 @@ const vis = document.getElementById("vis");
 let map;
 
 /* =========================
-   🚀 INTRO FLOW (FIXED)
+   🚀 INTRO (FIXED ONLY)
 ========================= */
 
 document.addEventListener("DOMContentLoaded", () => {
-
-  if (!intro || !modeScreen) {
-    console.error("Missing intro or modeScreen");
-    return;
-  }
-
   setTimeout(() => {
-    intro.style.display = "none";
-    modeScreen.style.display = "flex";
+    if (intro) intro.style.display = "none";
+    if (modeScreen) modeScreen.style.display = "flex";
   }, 1200);
 });
 
 /* =========================
-   🗺️ MAP INIT
+   🗺️ MAP (UNCHANGED LOGIC)
 ========================= */
 
 function initMap(lat, lon) {
-
   if (map) map.remove();
 
   map = L.map("map").setView([lat, lon], 6);
@@ -58,12 +51,11 @@ function initMap(lat, lon) {
 }
 
 /* =========================
-   🌦️ WEATHER (SAFE)
+   🌦️ WEATHER (SAFE FIX ONLY)
 ========================= */
 
 async function getWeather(lat, lon) {
   try {
-
     const url =
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
       "&hourly=temperature_2m,uv_index,wind_speed_10m,relative_humidity_2m,visibility,apparent_temperature" +
@@ -94,7 +86,7 @@ async function getWeather(lat, lon) {
     };
 
   } catch (e) {
-    console.error(e);
+    console.error("Weather error", e);
     return {
       temp: "--",
       feels: "--",
@@ -107,64 +99,48 @@ async function getWeather(lat, lon) {
 }
 
 /* =========================
-   🌍 LOAD WEATHER
+   🌍 LOAD WEATHER (UI SAME)
 ========================= */
 
 async function loadWeather(lat, lon, name) {
 
-  modeScreen.style.display = "none";
+  if (viewingText)
+    viewingText.textContent = "🌍 Viewing: " + name;
 
-  viewingText.textContent = "🌍 Viewing: " + name;
+  if (modeScreen)
+    modeScreen.style.display = "none";
 
   if (!map) initMap(lat, lon);
   else map.setView([lat, lon], 6);
 
   const w = await getWeather(lat, lon);
 
-  temp.textContent = w.temp;
-  feels.textContent = w.feels;
-  uv.textContent = w.uv;
-  wind.textContent = w.wind;
-  hum.textContent = w.hum;
-  vis.textContent = w.vis;
+  if (temp) temp.textContent = w.temp;
+  if (feels) feels.textContent = w.feels;
+  if (uv) uv.textContent = w.uv;
+  if (wind) wind.textContent = w.wind;
+  if (hum) hum.textContent = w.hum;
+  if (vis) vis.textContent = w.vis;
 }
 
 /* =========================
-   📍 BUTTONS (FIXED PROPERLY)
+   📍 BUTTONS (NOW ALL WORK)
 ========================= */
 
-useLocation.addEventListener("click", () => {
-
-  console.log("Location clicked");
-
-  if (!navigator.geolocation) {
-    alert("Geolocation not supported");
-    return;
-  }
-
+useLocation?.addEventListener("click", () => {
   navigator.geolocation.getCurrentPosition(
     (pos) => {
-      loadWeather(
-        pos.coords.latitude,
-        pos.coords.longitude,
-        "Your Location"
-      );
+      loadWeather(pos.coords.latitude, pos.coords.longitude, "Your Location");
     },
-    (err) => {
-      alert("Location blocked. Enable permissions in browser settings.");
-      console.error(err);
-    }
+    () => alert("Location blocked")
   );
 });
 
-/* 🌍 MANUAL (NOW WORKS — NOT BROKEN ANYMORE) */
-manualSelect.addEventListener("click", () => {
-
-  console.log("Manual clicked");
-
-  const lat = prompt("Enter latitude (e.g. 35.1856)");
-  const lon = prompt("Enter longitude (e.g. 33.3823)");
-  const name = prompt("Enter name (e.g. Cyprus)");
+/* 🌍 MANUAL BACK (SIMPLE PROMPT — NO UI BREAK) */
+manualSelect?.addEventListener("click", () => {
+  const lat = prompt("Latitude:");
+  const lon = prompt("Longitude:");
+  const name = prompt("Name:");
 
   if (!lat || !lon) return;
 
@@ -172,14 +148,8 @@ manualSelect.addEventListener("click", () => {
 });
 
 /* 🗺️ MAP MODE */
-mapPick.addEventListener("click", () => {
-
-  console.log("Map clicked");
-
+mapPick?.addEventListener("click", () => {
   modeScreen.style.display = "none";
 
-  const defaultLat = 35.1856;
-  const defaultLon = 33.3823;
-
-  loadWeather(defaultLat, defaultLon, "Map Mode");
+  loadWeather(35.1856, 33.3823, "Map Mode");
 });
