@@ -16,70 +16,60 @@
 
 <body>
 
-<!-- INTRO -->
-<div id="welcome">
-  <div class="welcomeCard">
-    <h1>☁️ SkyNow</h1>
-    <p>Loading...</p>
-  </div>
+<div id="bg"></div>
+
+<div class="app">
+
+<h1 class="title">SkyNow</h1>
+
+<!-- MENU -->
+<div class="menu">
+
+  <button id="startBtn">📍 Location</button>
+  <button id="manualBtn">🌍 Manual</button>
+  <button id="mapSelectBtn">🗺️ Pick Map</button>
+
 </div>
 
-<!-- APP -->
-<div class="app hidden" id="app">
+<div id="status">Choose a mode</div>
 
-  <h1 class="title">SkyNow</h1>
+<!-- MANUAL -->
+<div id="manualBox" class="hidden">
+  <select id="countrySelect"></select>
+  <button id="loadManual">Load</button>
+</div>
 
-  <div class="controls">
+<!-- LOADER -->
+<div id="loader" class="hidden"></div>
 
-    <button id="startBtn" class="bigBtn">📍 Use My Location</button>
-    <button id="manualBtn" class="bigBtn secondary">🌍 Manual Select</button>
-    <button id="mapSelectBtn" class="bigBtn secondary">🗺️ Pick From Map</button>
+<!-- WEATHER CARD -->
+<div id="card" class="glass hidden">
 
+  <div id="bigTemp">--°</div>
+  <div id="conditionText">--</div>
+
+  <div class="grid">
+    <div>🌡️ <span id="temp"></span></div>
+    <div>🤗 <span id="feels"></span></div>
+    <div>☀️ <span id="uv"></span></div>
+    <div>💨 <span id="wind"></span></div>
+    <div>💧 <span id="hum"></span></div>
+    <div>👁️ <span id="vis"></span></div>
   </div>
 
-  <div id="status">Choose a mode</div>
+</div>
 
-  <div id="manualBox" class="hidden">
-    <select id="countrySelect"></select>
-    <button id="loadManual" class="bigBtn">Load Weather</button>
+<!-- MAP ALWAYS VISIBLE -->
+<div id="mapBox">
+
+  <div id="mapControls">
+    <button id="mapExpand">⤢</button>
+    <button id="mapMinimise" class="hidden">⤡</button>
   </div>
 
-  <div id="loader" class="hidden"></div>
+  <div id="map"></div>
 
-  <div id="mainCard" class="glass hidden">
-    <div id="bigTemp">--°</div>
-    <div id="conditionText">--</div>
-  </div>
-
-  <div id="cards" class="grid hidden">
-
-    <div class="card">🌡️ Temp: <span id="temp"></span></div>
-    <div class="card">🤗 Feels: <span id="feels"></span></div>
-    <div class="card">☀️ UV: <span id="uv"></span></div>
-    <div class="card">💨 Wind: <span id="wind"></span></div>
-    <div class="card">💧 Humidity: <span id="hum"></span></div>
-    <div class="card">👁️ Visibility: <span id="vis"></span></div>
-
-    <div class="card wide" id="sun"></div>
-
-  </div>
-
-  <!-- MAP SCREEN -->
-  <div id="mapScreen" class="hidden">
-
-    <div id="mapControls" class="mapControls">
-
-      <button id="mapExpand">⤢ Expand</button>
-      <button id="mapMinimise" class="hidden">⤡ Minimise</button>
-      <button id="mapExit">✕ Exit</button>
-
-    </div>
-
-    <div id="mapContainer" class="mapBox">
-      <div id="map"></div>
-    </div>
-
-  </div>
+</div>
 
 </div>
 
