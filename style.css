@@ -21,83 +21,90 @@ body::before {
   z-index: -1;
 }
 
-/* APP ALWAYS VISIBLE FIX */
-#mainScreen {
-  opacity: 1;
-  transform: none;
-}
-
-/* 🌟 WELCOME */
-#welcome {
-  position: fixed;
-  inset: 0;
-  background: black;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-  animation: fadeOut 1s ease forwards;
-  animation-delay: 1.5s;
-}
-
-.welcomeCard {
-  text-align: center;
-  animation: pop 1s ease;
-}
-
-@keyframes pop {
-  from { transform: scale(0.8); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-@keyframes fadeOut {
-  to { opacity: 0; visibility: hidden; }
-}
-
 /* APP */
 .app {
-  padding: 20px;
+  padding: 22px;
   text-align: center;
 }
 
-/* 🌟 BIG BUTTONS */
+/* TITLE (same style system as buttons/cards) */
+.title {
+  font-size: 34px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
+}
+
+/* 🌟 GLASS BASE (used everywhere now) */
+.glass, .bigBtn, select, #loadManual {
+  background: rgba(255,255,255,0.10);
+  backdrop-filter: blur(22px);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: white;
+  border-radius: 22px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+/* 🌟 BUTTONS (NOW MATCH EVERYTHING) */
 .controls {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 12px;
+  margin-top: 10px;
 }
 
 .bigBtn {
-  width: 90%;
-  max-width: 340px;
+  width: 92%;
+  max-width: 360px;
   padding: 18px;
-  margin: 10px 0;
-  font-size: 18px;
-  font-weight: 700;
-  border-radius: 18px;
-  border: none;
-  color: white;
-  background: linear-gradient(135deg,#4facfe,#00f2fe);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  font-size: 17px;
+  font-weight: 600;
+  transition: 0.25s ease;
 }
 
+.bigBtn:active {
+  transform: scale(0.97);
+  opacity: 0.85;
+}
+
+/* make BOTH buttons identical style system */
 .bigBtn.secondary {
-  background: linear-gradient(135deg,#667eea,#764ba2);
+  background: rgba(255,255,255,0.08);
 }
 
-/* GLASS */
+/* 🌟 MANUAL BUTTON */
+#loadManual {
+  margin-top: 10px;
+  padding: 14px;
+  width: 60%;
+  font-weight: 600;
+}
+
+/* SELECT */
+select {
+  padding: 12px;
+  margin-top: 10px;
+  width: 80%;
+}
+
+/* HERO CARD */
 .glass {
-  background: rgba(255,255,255,0.10);
-  backdrop-filter: blur(22px);
-  border-radius: 28px;
-  padding: 22px;
-  margin: 16px 0;
+  padding: 24px;
+  margin: 18px 0;
 }
 
-/* HERO */
+/* BIG TEMP */
 #bigTemp {
-  font-size: 72px;
+  font-size: 74px;
   font-weight: 700;
+  letter-spacing: -2px;
+}
+
+#conditionText {
+  opacity: 0.8;
+  margin-top: 6px;
+  font-size: 18px;
 }
 
 /* GRID */
@@ -107,26 +114,20 @@ body::before {
   gap: 12px;
 }
 
+/* WEATHER CARDS */
 .card {
   background: rgba(255,255,255,0.08);
   backdrop-filter: blur(18px);
   border-radius: 18px;
   padding: 14px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 /* MAP */
 #map {
   height: 220px;
   border-radius: 16px;
-}
-
-/* SELECT */
-select {
-  padding: 10px;
-  border-radius: 12px;
-  background: rgba(255,255,255,0.12);
-  color: white;
-  border: none;
 }
 
 /* LOADER */
@@ -144,6 +145,22 @@ select {
   to { transform: rotate(360deg); }
 }
 
-.hidden {
-  display: none;
+/* WELCOME */
+#welcome {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: black;
+  z-index: 9999;
+  animation: fadeOut 1s ease forwards;
+  animation-delay: 1.5s;
 }
+
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+
+/* SAFE */
+.hidden { display: none; }
