@@ -1,10 +1,10 @@
-
 const startBtn = document.getElementById("startBtn");
 const manualBtn = document.getElementById("manualBtn");
-const loadManual = document.getElementById("loadManual");
+const mapSelectBtn = document.getElementById("mapSelectBtn");
 
 const manualBox = document.getElementById("manualBox");
 const countrySelect = document.getElementById("countrySelect");
+const loadManual = document.getElementById("loadManual");
 
 const status = document.getElementById("status");
 const loader = document.getElementById("loader");
@@ -28,9 +28,10 @@ const bg = document.getElementById("bg");
 const mapToggle = document.getElementById("mapToggle");
 const mapClose = document.getElementById("mapClose");
 const mapContainer = document.getElementById("mapContainer");
+const mapControls = document.getElementById("mapControls");
 
 let map;
-let expanded = false;
+let selectMode = false;
 
 /* COUNTRIES */
 const locations = [
@@ -49,7 +50,7 @@ locations.forEach(l=>{
   countrySelect.appendChild(o);
 });
 
-/* WEATHER TEXT */
+/* WEATHER */
 function weatherText(code){
   if(code===0) return "Clear Sky";
   if(code<=3) return "Cloudy";
@@ -57,11 +58,10 @@ function weatherText(code){
   return "Storm";
 }
 
-/* BACKGROUND */
 function setBackground(code){
   let g="linear-gradient(180deg,#4facfe,#00f2fe)";
-  if(code<=3) g="linear-gradient(180deg,#8e9eab,#eef2f3)";
-  if(code>3) g="linear-gradient(180deg,#1a1a1a,#000)";
+  if(code<=3) g="linear-gradient(180deg,#999,#eee)";
+  if(code>3) g="linear-gradient(180deg,#111,#000)";
   bg.style.background=g;
 }
 
@@ -77,18 +77,25 @@ function loadMap(lat,lon){
 
   L.marker([lat,lon]).addTo(map);
 
-  map.on("click", (e)=>{
-    loadWeather(e.latlng.lat, e.latlng.lng);
+  map.on("click",(e)=>{
+
+    if(selectMode){
+      selectMode=false;
+      loadWeather(e.latlng.lat,e.latlng.lng);
+    } else {
+      loadWeather(e.latlng.lat,e.latlng.lng);
+    }
+
   });
 }
 
-/* API */
+/* WEATHER API */
 async function getWeather(lat,lon){
 
   const url =
-    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-    "&hourly=temperature_2m,uv_index,wind_speed_10m,relative_humidity_2m,visibility,apparent_temperature,weather_code" +
-    "&daily=sunrise,sunset&timezone=auto";
+  `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+  "&hourly=temperature_2m,uv_index,wind_speed_10m,relative_humidity_2m,visibility,apparent_temperature,weather_code" +
+  "&daily=sunrise,sunset&timezone=auto";
 
   const res = await fetch(url);
   const data = await res.json();
@@ -96,7 +103,7 @@ async function getWeather(lat,lon){
   const now = new Date();
   const times = data.hourly.time;
 
-  let i=0, best=999999;
+  let i=0,best=999999;
 
   for(let x=0;x<times.length;x++){
     let d=Math.abs(new Date(times[x])-now);
@@ -132,6 +139,8 @@ async function loadWeather(lat,lon){
   mainCard.classList.remove("hidden");
   cards.classList.remove("hidden");
 
+  mapControls.classList.remove("hidden");
+
   bigTemp.textContent = `${w.temp}°`;
   conditionText.textContent = weatherText(w.code);
 
@@ -142,44 +151,43 @@ async function loadWeather(lat,lon){
   hum.textContent = w.hum;
   vis.textContent = w.vis;
 
-  sun.innerHTML =
-    `🌅 Sunrise: ${w.sunrise.split("T")[1]}<br>` +
-    `🌇 Sunset: ${w.sunset.split("T")[1]}`;
+  sun.innerHTML = `🌅 ${w.sunrise.split("T")[1]}<br>🌇 ${w.sunset.split("T")[1]}`;
 
   setBackground(w.code);
 }
 
 /* BUTTONS */
-startBtn.onclick = () => {
+startBtn.onclick = ()=>{
   navigator.geolocation.getCurrentPosition(p=>{
     loadWeather(p.coords.latitude,p.coords.longitude);
   });
 };
 
-manualBtn.onclick = () => manualBox.classList.toggle("hidden");
+manualBtn.onclick = ()=>manualBox.classList.toggle("hidden");
 
-loadManual.onclick = () => {
+loadManual.onclick = ()=>{
   const l = JSON.parse(countrySelect.value);
   loadWeather(l.lat,l.lon);
 };
 
-/* MAP CONTROLS */
-mapToggle.onclick = () => {
-  expanded = true;
+mapSelectBtn.onclick = ()=>{
+  selectMode=true;
+  status.textContent="Tap map to select location 🌍";
+};
+
+/* MAP BUTTONS */
+mapToggle.onclick = ()=>{
   mapContainer.classList.add("expanded");
-  mapClose.classList.remove("hidden");
   setTimeout(()=>map.invalidateSize(),300);
 };
 
-mapClose.onclick = () => {
-  expanded = false;
+mapClose.onclick = ()=>{
   mapContainer.classList.remove("expanded");
-  mapClose.classList.add("hidden");
   setTimeout(()=>map.invalidateSize(),300);
 };
 
 /* INTRO */
-window.onload = () => {
+window.onload = ()=>{
   setTimeout(()=>{
     document.getElementById("welcome").style.display="none";
   },1500);
