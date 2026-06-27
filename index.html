@@ -19,38 +19,32 @@
   <div class="title">🌤 Weather Pro+</div>
 
   <button id="startBtn">Use My Location</button>
-  <button id="manualBtn">Pick Country Manually</button>
+  <button id="manualBtn">Pick Location Manually</button>
 
   <div id="status">Choose a mode</div>
 
-  <!-- 🌍 MANUAL PICKER -->
   <div id="manualBox" class="hidden">
-
     <select id="countrySelect"></select>
-    <button id="loadCountry">Load Weather</button>
-
   </div>
 
-  <!-- 🔄 LOADER -->
+  <button id="loadManual">Load Selected Location</button>
+
   <div id="loader" class="loader hidden"></div>
 
   <div id="card" class="hidden">
 
     <div class="grid">
-
       <div class="box" id="temp">🌡️ Temp</div>
-      <div class="box" id="feels">🤗 Feels Like</div>
+      <div class="box" id="feels">🤗 Feels</div>
       <div class="box" id="uv">☀️ UV</div>
       <div class="box" id="wind">💨 Wind</div>
       <div class="box" id="hum">💧 Humidity</div>
       <div class="box" id="vis">👁️ Visibility</div>
       <div class="box" id="sun">🌅 Sun</div>
       <div class="box" id="cond">☁️ Condition</div>
-
     </div>
 
     <div id="msg"></div>
-
     <div id="map"></div>
 
   </div>
