@@ -1,4 +1,3 @@
-
 const startBtn = document.getElementById("startBtn");
 const manualBtn = document.getElementById("manualBtn");
 const loadManual = document.getElementById("loadManual");
@@ -25,17 +24,19 @@ const sun = document.getElementById("sun");
 
 const bg = document.getElementById("bg");
 
-let map;
+const mapToggle = document.getElementById("mapToggle");
+const mapContainer = document.getElementById("mapContainer");
 
-/* 🌍 COUNTRIES */
+let map;
+let expanded = false;
+
+/* COUNTRIES */
 const locations = [
   {name:"Cyprus",lat:35.1856,lon:33.3823},
   {name:"Greece",lat:37.9838,lon:23.7275},
   {name:"UK",lat:51.5072,lon:-0.1276},
-  {name:"France",lat:48.8566,lon:2.3522},
   {name:"USA",lat:40.7128,lon:-74.0060},
   {name:"Japan",lat:35.6762,lon:139.6503},
-  {name:"Australia",lat:-35.2809,lon:149.1300},
   {name:"India",lat:28.6139,lon:77.2090}
 ];
 
@@ -48,49 +49,55 @@ locations.forEach(l=>{
 
 /* WEATHER */
 function weatherText(code){
-  if(code===0) return "Clear";
+  if(code===0) return "Clear Sky";
   if(code<=3) return "Cloudy";
-  if(code<=48) return "Fog";
   if(code<=67) return "Rain";
   return "Storm";
 }
 
 /* BACKGROUND */
 function setBackground(code){
-  let g;
-  if(code===0) g="linear-gradient(180deg,#4facfe,#00f2fe)";
-  else if(code<=3) g="linear-gradient(180deg,#8e9eab,#eef2f3)";
-  else g="linear-gradient(180deg,#2c2c2c,#111)";
+  let g="linear-gradient(180deg,#4facfe,#00f2fe)";
+  if(code<=3) g="linear-gradient(180deg,#8e9eab,#eef2f3)";
+  if(code>3) g="linear-gradient(180deg,#1c1c1c,#000)";
   bg.style.background=g;
 }
 
 /* MAP */
 function loadMap(lat,lon){
+
   if(map) map.remove();
-  map=L.map("map").setView([lat,lon],7);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(map);
+
+  map = L.map("map").setView([lat,lon],7);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
+  .addTo(map);
+
   L.marker([lat,lon]).addTo(map);
+
+  map.on("click", async (e)=> {
+    loadWeather(e.latlng.lat, e.latlng.lng);
+  });
 }
 
 /* API */
 async function getWeather(lat,lon){
 
   const url =
-    "https://api.open-meteo.com/v1/forecast" +
-    `?latitude=${lat}&longitude=${lon}` +
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
     "&hourly=temperature_2m,uv_index,wind_speed_10m,relative_humidity_2m,visibility,apparent_temperature,weather_code" +
     "&daily=sunrise,sunset&timezone=auto";
 
-  const res=await fetch(url);
-  const data=await res.json();
+  const res = await fetch(url);
+  const data = await res.json();
 
-  const now=new Date();
-  const times=data.hourly.time;
+  const now = new Date();
+  const times = data.hourly.time;
 
-  let i=0,best=Infinity;
+  let i=0, best=999999;
 
   for(let x=0;x<times.length;x++){
-    const d=Math.abs(new Date(times[x])-now);
+    let d=Math.abs(new Date(times[x])-now);
     if(d<best){best=d;i=x;}
   }
 
@@ -107,13 +114,6 @@ async function getWeather(lat,lon){
   };
 }
 
-/* GPS */
-function getLocation(){
-  return new Promise(r=>{
-    navigator.geolocation.getCurrentPosition(p=>r(p),()=>r(null));
-  });
-}
-
 /* LOAD */
 async function loadWeather(lat,lon){
 
@@ -122,7 +122,7 @@ async function loadWeather(lat,lon){
 
   loadMap(lat,lon);
 
-  const w=await getWeather(lat,lon);
+  const w = await getWeather(lat,lon);
 
   loader.classList.add("hidden");
   status.style.display="none";
@@ -130,39 +130,43 @@ async function loadWeather(lat,lon){
   mainCard.classList.remove("hidden");
   cards.classList.remove("hidden");
 
-  bigTemp.textContent=`${w.temp}°`;
-  conditionText.textContent=weatherText(w.code);
+  bigTemp.textContent = `${w.temp}°`;
+  conditionText.textContent = weatherText(w.code);
 
-  temp.textContent=`Temperature: ${w.temp}°C`;
-  feels.textContent=`Feels Like: ${w.feels}°C`;
-  uv.textContent=`UV Index: ${w.uv}`;
-  wind.textContent=`Wind: ${w.wind} km/h`;
-  hum.textContent=`Humidity: ${w.hum}%`;
-  vis.textContent=`Visibility: ${w.vis} m`;
+  temp.textContent = `${w.temp}°C`;
+  feels.textContent = `${w.feels}°C`;
+  uv.textContent = w.uv;
+  wind.textContent = w.wind;
+  hum.textContent = w.hum;
+  vis.textContent = w.vis;
 
-  sun.innerHTML=`Sunrise: ${w.sunrise.split("T")[1]}<br>Sunset: ${w.sunset.split("T")[1]}`;
+  sun.innerHTML = `🌅 ${w.sunrise.split("T")[1]}<br>🌇 ${w.sunset.split("T")[1]}`;
 
   setBackground(w.code);
 }
 
 /* BUTTONS */
-startBtn.onclick=async()=>{
-  const p=await getLocation();
-  loadWeather(p?p.coords.latitude:35.1856,p?p.coords.longitude:33.3823);
+startBtn.onclick = async ()=>{
+  navigator.geolocation.getCurrentPosition(p=>{
+    loadWeather(p.coords.latitude,p.coords.longitude);
+  });
 };
 
-manualBtn.onclick=()=>{
-  manualBox.classList.toggle("hidden");
-};
+manualBtn.onclick = ()=> manualBox.classList.toggle("hidden");
 
-loadManual.onclick=()=>{
-  const l=JSON.parse(countrySelect.value);
+loadManual.onclick = ()=>{
+  const l = JSON.parse(countrySelect.value);
   loadWeather(l.lat,l.lon);
 };
 
-/* WELCOME FIX (IMPORTANT) */
-window.addEventListener("load",()=>{
-  setTimeout(()=>{
-    document.getElementById("welcome").style.display="none";
-  },1500);
-});
+/* MAP TOGGLE */
+mapToggle.onclick = ()=>{
+  expanded = !expanded;
+  mapContainer.classList.toggle("expanded",expanded);
+  setTimeout(()=> map.invalidateSize(),300);
+};
+
+/* START */
+window.onload = ()=>{
+  setTimeout(()=>document.getElementById("welcome").style.display="none",1500);
+};
