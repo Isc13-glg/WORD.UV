@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
 <title>SkyNow</title>
 
@@ -11,71 +11,59 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css"/>
 </head>
 
 <body>
 
-<!-- INTRO -->
+<!-- 🌑 INTRO -->
 <div id="intro">
-  <div class="logo">☁️ SkyNow</div>
+  <h1>☁️ SkyNow</h1>
   <div class="loader"></div>
 </div>
 
-<!-- APP -->
-<div id="app" class="hidden">
+<!-- 🌍 MODE SCREEN -->
+<div id="modeScreen" class="hidden">
+  <h2>Choose Mode</h2>
 
-  <!-- MODE SELECT -->
-  <div id="modeScreen">
+  <button id="useLocation">📍 Use My Location</button>
+  <button id="manualSelect">🌍 Manual Select</button>
+  <button id="mapPick">🗺️ Pick From Map</button>
+</div>
 
-    <h1>Choose Mode</h1>
+<!-- APP (YOUR ORIGINAL APP GOES HERE) -->
+<div class="app">
 
-    <button id="useLocation">📍 Use My Location</button>
-    <button id="manual">🌍 Manual Select</button>
-    <button id="mapMode">🗺️ Pick From Map</button>
+  <!-- 🌍 VIEWING TEXT -->
+  <div id="viewingText">🌍 Viewing: --</div>
 
-    <div id="manualBox" class="hidden">
-      <select id="countrySelect"></select>
-      <button id="loadCountry">Load</button>
-    </div>
+  <!-- YOUR EXISTING UI -->
+  <button id="startBtn">Start</button>
 
+  <div id="manualBox" class="hidden">
+    <select id="countrySelect"></select>
+    <button id="loadManual">Load</button>
   </div>
 
-  <!-- DASHBOARD -->
-  <div id="dashboard" class="hidden">
+  <div id="loader" class="hidden"></div>
 
-    <div id="locationText">🌍 Viewing: --</div>
+  <div id="mainCard" class="hidden">
+    <div id="bigTemp">--°</div>
+    <div id="conditionText">--</div>
+  </div>
 
-    <div id="loader" class="hidden"></div>
+  <div id="cards" class="hidden">
+    <div>🌡️ <span id="temp"></span></div>
+    <div>🤗 <span id="feels"></span></div>
+    <div>☀️ <span id="uv"></span></div>
+    <div>💨 <span id="wind"></span></div>
+    <div>💧 <span id="hum"></span></div>
+    <div>👁️ <span id="vis"></span></div>
+  </div>
 
-    <div class="card">
-
-      <div id="tempBig">--°</div>
-      <div id="condition">--</div>
-
-      <div class="grid">
-        <div>🌡️ <span id="temp"></span></div>
-        <div>🤗 <span id="feels"></span></div>
-        <div>☀️ <span id="uv"></span></div>
-        <div>💨 <span id="wind"></span></div>
-        <div>💧 <span id="hum"></span></div>
-        <div>👁️ <span id="vis"></span></div>
-      </div>
-
-    </div>
-
-    <!-- MAP ALWAYS SMALL -->
-    <div id="mapBox">
-
-      <div id="mapControls">
-        <button id="expand">⤢</button>
-        <button id="minimise" class="hidden">⤡</button>
-      </div>
-
-      <div id="map"></div>
-
-    </div>
-
+  <!-- MAP (KEEP YOUR ORIGINAL MAP CONTAINER) -->
+  <div id="mapContainer">
+    <div id="map"></div>
   </div>
 
 </div>
