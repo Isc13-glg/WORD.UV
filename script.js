@@ -1,3 +1,4 @@
+
 const startBtn = document.getElementById("startBtn");
 const status = document.getElementById("status");
 const card = document.getElementById("card");
@@ -22,12 +23,20 @@ function speak(text){
   speechSynthesis.speak(u);
 }
 
+// 🌈 UV ICONS
+function uvIcon(u){
+  if(u <= 2) return "☁️";
+  if(u <= 5) return "⛅";
+  if(u <= 7) return "🌤️";
+  return "☀️🔥";
+}
+
 // ☀️ UV TEXT
 function uvText(u){
-  if(u <= 2) return "Low UV ☁️";
-  if(u <= 5) return "Moderate UV 🌤️";
-  if(u <= 7) return "High UV 🔥";
-  return "Extreme UV 🚨";
+  if(u <= 2) return "Low UV";
+  if(u <= 5) return "Moderate UV";
+  if(u <= 7) return "High UV";
+  return "Extreme UV";
 }
 
 // 🔊 ALARM
@@ -38,7 +47,7 @@ function playAlarm(uv){
   }
 }
 
-// 🗺️ MAP FIX (NO GREY BUG)
+// 🗺️ FIX MAP (NO GRAY SCREEN BUG)
 function loadMap(lat,lon){
 
   setTimeout(()=>{
@@ -107,21 +116,20 @@ startBtn.onclick = () => {
     card.classList.remove("hidden");
     status.style.display = "none";
 
-    tempBox.textContent = `🌡️ Temp: ${w.temp}°C`;
-    uvBox.textContent = `☀️ UV: ${w.uv}`;
-    windBox.textContent = `💨 Wind: ${w.wind} km/h`;
-    humBox.textContent = `💧 Humidity: ${w.hum}%`;
+    tempBox.innerHTML = `🌡️ Temp: <b>${w.temp}°C</b>`;
+    uvBox.innerHTML = `${uvIcon(w.uv)} UV: <b>${w.uv}</b>`;
+    windBox.innerHTML = `💨 Wind: <b>${w.wind} km/h</b>`;
+    humBox.innerHTML = `💧 Humidity: <b>${w.hum}%</b>`;
 
     msg.textContent = uvText(w.uv);
 
-    speak(`Temperature is ${w.temp} degrees. UV index is ${w.uv}`);
+    speak(`Temperature is ${w.temp} degrees. UV is ${w.uv}`);
 
     playAlarm(w.uv);
 
   },
   err => {
     status.textContent = "Location blocked or unavailable";
-    console.log(err);
   });
 
 };
