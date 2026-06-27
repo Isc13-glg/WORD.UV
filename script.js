@@ -1,7 +1,7 @@
-
 const startBtn = document.getElementById("startBtn");
 const status = document.getElementById("status");
 const result = document.getElementById("result");
+const weatherBox = document.getElementById("weatherBox");
 const uvBox = document.getElementById("uvBox");
 const msg = document.getElementById("msg");
 const alarm = document.getElementById("alarm");
@@ -9,16 +9,45 @@ const alarm = document.getElementById("alarm");
 let map;
 let unlocked = false;
 
-// 🌍 SIMPLE COUNTRIES
-const countries = [
-  {name:"Cyprus",lat:35.1856,lon:33.3823},
-  {name:"Greece",lat:37.9838,lon:23.7275},
-  {name:"France",lat:48.8566,lon:2.3522},
-  {name:"Germany",lat:52.52,lon:13.405},
-  {name:"USA",lat:38.9072,lon:-77.0369}
-];
+---
 
-// 🔊 alarm
+# 🔊 VOICE (FIXED FOR IPHONE + CHROME)
+
+function speak(text){
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US";
+  u.rate = 1;
+
+  speechSynthesis.cancel();
+  speechSynthesis.speak(u);
+}
+
+---
+
+# ☀️ UV MESSAGE
+
+function uvMessage(uv){
+  if(uv <= 2) return "Low UV – Safe";
+  if(uv <= 5) return "Moderate UV";
+  if(uv <= 7) return "High UV – Be careful";
+  return "Extreme UV – Avoid sun";
+}
+
+---
+
+# 🌤️ WEATHER MESSAGE
+
+function weatherMessage(temp){
+  if(temp < 10) return "Cold";
+  if(temp < 20) return "Mild";
+  if(temp < 30) return "Warm";
+  return "Hot";
+}
+
+---
+
+# 🔊 ALARM (ONLY UV ≥ 6.5)
+
 function playAlarm(uv){
   if(uv >= 6.5 && unlocked){
     alarm.currentTime = 0;
@@ -26,15 +55,10 @@ function playAlarm(uv){
   }
 }
 
-// ☀️ UV message
-function getMsg(uv){
-  if(uv <= 2) return "Safe";
-  if(uv <= 5) return "Moderate";
-  if(uv <= 7) return "High";
-  return "Danger";
-}
+---
 
-// 🗺️ FIXED MAP (NO GRAY BUG)
+# 🗺️ FIXED MAP (NO GREY BUG)
+
 function loadMap(lat,lon){
 
   setTimeout(() => {
@@ -52,16 +76,19 @@ function loadMap(lat,lon){
 
     L.marker([lat,lon]).addTo(map);
 
-    setTimeout(() => map.invalidateSize(true), 600);
+    setTimeout(() => map.invalidateSize(true), 500);
 
   }, 300);
 }
 
-// 🌍 UV FETCH
-async function getUV(lat,lon){
+---
+
+# 🌍 WEATHER + UV FETCH
+
+async function getData(lat,lon){
 
   const url =
-  `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=uv_index,cloud_cover&timezone=auto`;
+  `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=temperature_2m,uv_index,cloud_cover&timezone=auto`;
 
   const res = await fetch(url);
   const data = await res.json();
@@ -77,6 +104,7 @@ async function getUV(lat,lon){
     if(d < best){ best = d; i = x; }
   }
 
+  let temp = data.hourly.temperature_2m[i];
   let uv = data.hourly.uv_index[i];
   const cloud = data.hourly.cloud_cover[i] ?? 0;
 
@@ -84,10 +112,13 @@ async function getUV(lat,lon){
   uv = Math.max(0,Math.min(11,uv));
   uv = Math.round(uv*10)/10;
 
-  return uv;
+  return {temp, uv};
 }
 
-// 🚀 START
+---
+
+# 🚀 START BUTTON
+
 startBtn.onclick = () => {
 
   unlocked = true;
@@ -97,16 +128,24 @@ startBtn.onclick = () => {
     const lat = pos.coords.latitude;
     const lon = pos.coords.longitude;
 
-    status.textContent = "Loading UV...";
+    status.textContent = "Loading weather...";
 
     loadMap(lat,lon);
 
-    const uv = await getUV(lat,lon);
+    const {temp, uv} = await getData(lat,lon);
 
     result.classList.remove("hidden");
 
-    uvBox.textContent = "UV: " + uv;
-    msg.textContent = getMsg(uv);
+    weatherBox.textContent =
+      `🌡️ Temperature: ${temp}°C`;
+
+    uvBox.textContent =
+      `☀️ UV Index: ${uv}`;
+
+    msg.textContent =
+      `${weatherMessage(temp)} | ${uvMessage(uv)}`;
+
+    speak(`Current temperature is ${temp} degrees. UV index is ${uv}`);
 
     playAlarm(uv);
 
