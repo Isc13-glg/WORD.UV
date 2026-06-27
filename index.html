@@ -33,7 +33,7 @@
 
     <button id="startBtn" class="bigBtn">📍 Use My Location</button>
     <button id="manualBtn" class="bigBtn secondary">🌍 Manual Select</button>
-    <button id="mapSelectBtn" class="bigBtn secondary">🗺️ Choose From Map</button>
+    <button id="mapSelectBtn" class="bigBtn secondary">🗺️ Pick From Map</button>
 
   </div>
 
@@ -41,7 +41,7 @@
 
   <div id="manualBox" class="hidden">
     <select id="countrySelect"></select>
-    <button id="loadManual" class="bigBtn smallBtn">Load Weather</button>
+    <button id="loadManual" class="bigBtn">Load Weather</button>
   </div>
 
   <div id="loader" class="hidden"></div>
@@ -64,14 +64,15 @@
 
   </div>
 
-  <!-- MAP CONTROLS (FLOATING) -->
+  <!-- MAP CONTROLS -->
   <div id="mapControls" class="mapControls hidden">
+
     <button id="mapToggle" class="miniBtn">⤢ Expand</button>
-    <button id="mapClose" class="miniBtn danger">✕ Close</button>
+    <button id="mapClose" class="miniBtn danger hidden">✕ Close</button>
+
   </div>
 
-  <!-- MAP -->
-  <div id="mapContainer" class="mapBox">
+  <div id="mapContainer" class="mapBox hidden">
     <div id="map"></div>
   </div>
 
