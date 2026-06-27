@@ -1,19 +1,19 @@
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
   color: white;
   overflow-x: hidden;
 }
 
-/* 🌈 animated background stays dynamic from JS */
+/* 🌈 background */
 #bg {
   position: fixed;
   inset: 0;
   z-index: -2;
-  transition: 1s ease;
+  transition: background 1.2s ease;
 }
 
-/* subtle dark overlay for Apple depth */
+/* dark overlay */
 body::before {
   content: "";
   position: fixed;
@@ -22,112 +22,110 @@ body::before {
   z-index: -1;
 }
 
-/* APP LAYOUT */
+/* 🌟 WELCOME SCREEN */
+#welcome {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: black;
+  z-index: 9999;
+  animation: fadeOut 1s ease forwards;
+  animation-delay: 1.5s;
+}
+
+.welcomeCard {
+  text-align: center;
+  animation: pop 1s ease;
+}
+
+@keyframes pop {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+
+/* APP */
 .app {
   padding: 18px;
   text-align: center;
+  animation: fadeIn 0.8s ease;
 }
 
-/* 🧊 GLASS CORE (MAIN APPLE EFFECT) */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 🧊 GLASS */
 .glass {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255,255,255,0.10);
   backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-
-  border: 1px solid rgba(255, 255, 255, 0.18);
-
   border-radius: 28px;
-
-  box-shadow:
-    0 20px 40px rgba(0,0,0,0.35),
-    inset 0 1px 0 rgba(255,255,255,0.2);
-
   padding: 22px;
   margin: 16px 0;
-
-  transform: translateY(0);
-  transition: 0.3s ease;
+  border: 1px solid rgba(255,255,255,0.18);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.35);
 }
 
-.glass:active {
-  transform: scale(0.99);
-}
-
-/* 🌡 HERO TEMPERATURE */
+/* HERO TEMP */
 #bigTemp {
   font-size: 72px;
   font-weight: 700;
-  letter-spacing: -2px;
 }
 
 #conditionText {
-  font-size: 16px;
-  opacity: 0.75;
-  margin-top: 6px;
+  opacity: 0.8;
 }
 
-/* 🧱 GRID CARDS */
+/* GRID */
 .grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-top: 18px;
+  gap: 12px;
 }
 
-/* 📦 CARD STYLE */
 .card {
-  background: rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.08);
   backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-
+  border-radius: 18px;
+  padding: 14px;
   border: 1px solid rgba(255,255,255,0.12);
-
-  border-radius: 20px;
-  padding: 16px;
-
-  font-size: 14px;
-
-  box-shadow:
-    0 10px 25px rgba(0,0,0,0.25),
-    inset 0 1px 0 rgba(255,255,255,0.1);
 }
 
-/* 🌅 FULL WIDTH CARDS */
-.wide {
-  grid-column: span 2;
-  min-height: 120px;
-}
-
-/* 🗺 MAP GLASS FEEL */
+/* MAP */
 #map {
   height: 220px;
-  border-radius: 18px;
-  overflow: hidden;
+  border-radius: 16px;
 }
 
-/* 🔘 BUTTONS (APPLE STYLE) */
+/* BUTTONS */
 button {
   padding: 12px 16px;
   border-radius: 14px;
   border: none;
-
+  margin: 5px;
+  font-weight: 600;
   background: rgba(255,255,255,0.12);
   color: white;
-
-  backdrop-filter: blur(10px);
-
-  font-weight: 600;
-
-  margin: 6px;
-
-  box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+  transition: transform 0.15s ease;
 }
 
 button:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
-/* 🌍 SELECT */
+/* SELECT */
 select {
   padding: 10px;
   border-radius: 12px;
@@ -136,7 +134,7 @@ select {
   color: white;
 }
 
-/* 🔄 LOADER (APPLE SPIN) */
+/* LOADER */
 #loader {
   width: 44px;
   height: 44px;
@@ -151,7 +149,4 @@ select {
   to { transform: rotate(360deg); }
 }
 
-/* HIDE */
-.hidden {
-  display: none;
-}
+.hidden { display: none; }
