@@ -16,6 +16,7 @@
 
 <body>
 
+<!-- INTRO -->
 <div id="welcome">
   <div class="welcomeCard">
     <h1>☁️ SkyNow</h1>
@@ -23,9 +24,8 @@
   </div>
 </div>
 
-<div id="bg"></div>
-
-<div class="app">
+<!-- APP -->
+<div class="app hidden" id="app">
 
   <h1 class="title">SkyNow</h1>
 
@@ -53,9 +53,9 @@
 
   <div id="cards" class="grid hidden">
 
-    <div class="card">🌡️ Temperature: <span id="temp"></span></div>
-    <div class="card">🤗 Feels Like: <span id="feels"></span></div>
-    <div class="card">☀️ UV Index: <span id="uv"></span></div>
+    <div class="card">🌡️ Temp: <span id="temp"></span></div>
+    <div class="card">🤗 Feels: <span id="feels"></span></div>
+    <div class="card">☀️ UV: <span id="uv"></span></div>
     <div class="card">💨 Wind: <span id="wind"></span></div>
     <div class="card">💧 Humidity: <span id="hum"></span></div>
     <div class="card">👁️ Visibility: <span id="vis"></span></div>
@@ -64,16 +64,21 @@
 
   </div>
 
-  <!-- MAP CONTROLS -->
-  <div id="mapControls" class="mapControls hidden">
+  <!-- MAP SCREEN -->
+  <div id="mapScreen" class="hidden">
 
-    <button id="mapToggle" class="miniBtn">⤢ Expand</button>
-    <button id="mapClose" class="miniBtn danger hidden">✕ Close</button>
+    <div id="mapControls" class="mapControls">
 
-  </div>
+      <button id="mapExpand">⤢ Expand</button>
+      <button id="mapMinimise" class="hidden">⤡ Minimise</button>
+      <button id="mapExit">✕ Exit</button>
 
-  <div id="mapContainer" class="mapBox hidden">
-    <div id="map"></div>
+    </div>
+
+    <div id="mapContainer" class="mapBox">
+      <div id="map"></div>
+    </div>
+
   </div>
 
 </div>
