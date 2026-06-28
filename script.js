@@ -1,150 +1,191 @@
-console.log("SkyNow SAFE restore loaded");
+const app = document.getElementById("app");
+const intro = document.getElementById("welcome");
 
-/* =========================
-   DO NOT TOUCH UI (ONLY LOGIC)
-========================= */
+const startBtn = document.getElementById("startBtn");
+const manualBtn = document.getElementById("manualBtn");
+const mapSelectBtn = document.getElementById("mapSelectBtn");
 
-const intro = document.getElementById("intro");
-const modeScreen = document.getElementById("modeScreen");
+const manualBox = document.getElementById("manualBox");
+const countrySelect = document.getElementById("countrySelect");
+const loadManual = document.getElementById("loadManual");
 
-const useLocation = document.getElementById("useLocation");
-const manualSelect = document.getElementById("manualSelect");
-const mapPick = document.getElementById("mapPick");
+const status = document.getElementById("status");
+const loader = document.getElementById("loader");
 
-const viewingText = document.getElementById("viewingText");
+const mainCard = document.getElementById("mainCard");
+const cards = document.getElementById("cards");
+
+const temp = document.getElementById("temp");
+const feels = document.getElementById("feels");
+const uv = document.getElementById("uv");
+const wind = document.getElementById("wind");
+const hum = document.getElementById("hum");
+const vis = document.getElementById("vis");
+const sun = document.getElementById("sun");
+
+const bigTemp = document.getElementById("bigTemp");
+const conditionText = document.getElementById("conditionText");
+
+const mapScreen = document.getElementById("mapScreen");
+const mapContainer = document.getElementById("mapContainer");
+
+const mapExpand = document.getElementById("mapExpand");
+const mapMinimise = document.getElementById("mapMinimise");
+const mapExit = document.getElementById("mapExit");
 
 let map;
+let selectMode = false;
 
-/* =========================
-   🚀 INTRO (ONLY FIX, NO UI CHANGE)
-========================= */
+/* INTRO */
+window.onload = () => {
+  setTimeout(()=>{
+    intro.style.display="none";
+    app.classList.remove("hidden");
+  },1500);
+};
 
-document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(() => {
-    if (intro) intro.style.display = "none";
-    if (modeScreen) modeScreen.style.display = "flex";
-  }, 1200);
+/* COUNTRIES */
+const locations = [
+  {name:"Cyprus",lat:35.1856,lon:33.3823},
+  {name:"Greece",lat:37.9838,lon:23.7275},
+  {name:"UK",lat:51.5072,lon:-0.1276},
+  {name:"USA",lat:40.7128,lon:-74.0060}
+];
+
+locations.forEach(l=>{
+  const o=document.createElement("option");
+  o.value=JSON.stringify(l);
+  o.textContent=l.name;
+  countrySelect.appendChild(o);
 });
 
-/* =========================
-   🗺️ MAP (UNCHANGED)
-========================= */
+/* MAP */
+function loadMap(lat,lon){
 
-function initMap(lat, lon) {
-  if (map) map.remove();
+  if(map) map.remove();
 
-  map = L.map("map").setView([lat, lon], 6);
+  map = L.map("map").setView([lat,lon],7);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png")
-    .addTo(map);
+  .addTo(map);
 
-  map.on("click", (e) => {
-    loadWeather(e.latlng.lat, e.latlng.lng, "Map Selection");
+  map.on("click",(e)=>{
+    if(selectMode){
+      selectMode=false;
+      loadWeather(e.latlng.lat,e.latlng.lng);
+    }
   });
 }
 
-/* =========================
-   🌦️ WEATHER (SAFE ONLY)
-========================= */
+/* WEATHER */
+async function getWeather(lat,lon){
 
-async function getWeather(lat, lon) {
-  try {
+  const url =
+  `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+  "&hourly=temperature_2m,uv_index,wind_speed_10m,relative_humidity_2m,visibility,apparent_temperature,weather_code" +
+  "&daily=sunrise,sunset&timezone=auto";
 
-    const url =
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-      "&hourly=temperature_2m,uv_index,wind_speed_10m,relative_humidity_2m,visibility,apparent_temperature" +
-      "&timezone=auto";
+  const res = await fetch(url);
+  const data = await res.json();
 
-    const res = await fetch(url);
-    const data = await res.json();
+  let i=0;
+  const now=new Date();
+  let best=999999;
 
-    let i = 0;
-    let best = Infinity;
-    const now = new Date();
-
-    for (let x = 0; x < data.hourly.time.length; x++) {
-      const d = Math.abs(new Date(data.hourly.time[x]) - now);
-      if (d < best) {
-        best = d;
-        i = x;
-      }
-    }
-
-    return {
-      temp: data.hourly.temperature_2m[i],
-      feels: data.hourly.apparent_temperature[i],
-      uv: data.hourly.uv_index[i],
-      wind: data.hourly.wind_speed_10m[i],
-      hum: data.hourly.relative_humidity_2m[i],
-      vis: data.hourly.visibility[i]
-    };
-
-  } catch (e) {
-    console.error(e);
-
-    return {
-      temp: "--",
-      feels: "--",
-      uv: "--",
-      wind: "--",
-      hum: "--",
-      vis: "--"
-    };
+  for(let x=0;x<data.hourly.time.length;x++){
+    let d=Math.abs(new Date(data.hourly.time[x]) - now);
+    if(d<best){best=d;i=x;}
   }
+
+  return {
+    temp:data.hourly.temperature_2m[i],
+    feels:data.hourly.apparent_temperature[i],
+    uv:data.hourly.uv_index[i],
+    wind:data.hourly.wind_speed_10m[i],
+    hum:data.hourly.relative_humidity_2m[i],
+    vis:data.hourly.visibility[i],
+    code:data.hourly.weather_code[i],
+    sunrise:data.daily.sunrise[0],
+    sunset:data.daily.sunset[0]
+  };
 }
 
-/* =========================
-   🌍 LOAD WEATHER (NO UI CHANGES)
-========================= */
+/* LOAD WEATHER */
+async function loadWeather(lat,lon){
 
-async function loadWeather(lat, lon, name) {
+  mapScreen.classList.add("hidden");
 
-  if (viewingText)
-    viewingText.textContent = "🌍 Viewing: " + name;
+  loader.classList.remove("hidden");
+  status.textContent="Loading...";
 
-  if (modeScreen)
-    modeScreen.style.display = "none";
+  const w = await getWeather(lat,lon);
 
-  if (!map) initMap(lat, lon);
-  else map.setView([lat, lon], 6);
+  loader.classList.add("hidden");
+  status.style.display="none";
 
-  const w = await getWeather(lat, lon);
+  mainCard.classList.remove("hidden");
+  cards.classList.remove("hidden");
 
-  // OLD UI ELEMENTS ONLY (no redesign)
-  document.getElementById("temp").textContent = w.temp;
-  document.getElementById("feels").textContent = w.feels;
-  document.getElementById("uv").textContent = w.uv;
-  document.getElementById("wind").textContent = w.wind;
-  document.getElementById("hum").textContent = w.hum;
-  document.getElementById("vis").textContent = w.vis;
+  bigTemp.textContent = `${w.temp}°`;
+  conditionText.textContent = "Weather";
+
+  temp.textContent=w.temp;
+  feels.textContent=w.feels;
+  uv.textContent=w.uv;
+  wind.textContent=w.wind;
+  hum.textContent=w.hum;
+  vis.textContent=w.vis;
+
+  sun.innerHTML=`🌅 ${w.sunrise.split("T")[1]}<br>🌇 ${w.sunset.split("T")[1]}`;
 }
 
-/* =========================
-   📍 BUTTONS (FIX ONLY)
-========================= */
+/* BUTTONS */
+startBtn.onclick = () => {
+  navigator.geolocation.getCurrentPosition(p=>{
+    loadWeather(p.coords.latitude,p.coords.longitude);
+  });
+};
 
-useLocation?.addEventListener("click", () => {
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      loadWeather(pos.coords.latitude, pos.coords.longitude, "Your Location");
-    },
-    () => alert("Location blocked")
-  );
-});
+manualBtn.onclick = () => {
+  manualBox.classList.toggle("hidden");
+};
 
-/* 🌍 MANUAL (KEEPS OLD SIMPLE STYLE) */
-manualSelect?.addEventListener("click", () => {
-  const lat = prompt("Enter latitude:");
-  const lon = prompt("Enter longitude:");
-  const name = prompt("Enter name:");
+loadManual.onclick = () => {
+  const l = JSON.parse(countrySelect.value);
+  loadWeather(l.lat,l.lon);
+};
 
-  if (!lat || !lon) return;
+/* MAP MODE */
+mapSelectBtn.onclick = () => {
 
-  loadWeather(parseFloat(lat), parseFloat(lon), name || "Manual");
-});
+  selectMode = true;
 
-/* 🗺️ MAP MODE */
-mapPick?.addEventListener("click", () => {
-  modeScreen.style.display = "none";
-  loadWeather(35.1856, 33.3823, "Map Mode");
-});
+  app.classList.remove("hidden");
+  mapScreen.classList.remove("hidden");
+
+  if(!map){
+    loadMap(35.1856,33.3823);
+  }
+
+  setTimeout(()=>map.invalidateSize(),300);
+};
+
+/* MAP BUTTONS */
+mapExpand.onclick = () => {
+  mapContainer.classList.add("expanded");
+  mapMinimise.classList.remove("hidden");
+  mapExpand.classList.add("hidden");
+  setTimeout(()=>map.invalidateSize(),300);
+};
+
+mapMinimise.onclick = () => {
+  mapContainer.classList.remove("expanded");
+  mapMinimise.classList.add("hidden");
+  mapExpand.classList.remove("hidden");
+  setTimeout(()=>map.invalidateSize(),300);
+};
+
+mapExit.onclick = () => {
+  selectMode = false;
+  mapScreen.classList.add("hidden");
+};
