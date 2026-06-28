@@ -1,48 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
 <title>SkyNow</title>
 
-<link rel="stylesheet" href="style.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<link rel="stylesheet" href="style.css"/>
 </head>
 
 <body>
 
-<!-- ✅ INTRO -->
-<div id="intro">
-  <h1>☁️ SkyNow</h1>
-  <div class="loader"></div>
+<!-- INTRO -->
+<div id="welcome">
+  <div class="welcomeCard">
+    <h1>☁️ SkyNow</h1>
+    <p>Loading...</p>
+  </div>
 </div>
 
-<!-- ✅ MODE SCREEN -->
-<div id="modeScreen" class="hidden">
-  <h2>Choose Mode</h2>
+<!-- APP -->
+<div class="app hidden" id="app">
 
-  <button id="useLocation">📍 Use My Location</button>
-  <button id="manualSelect">🌍 Manual Select</button>
-  <button id="mapPick">🗺️ Pick From Map</button>
-</div>
+  <h1 class="title">SkyNow</h1>
 
-<!-- ✅ MAIN APP (your weather UI stays here) -->
-<div id="app">
+  <div class="controls">
 
-  <div id="viewingText">🌍 Viewing: --</div>
+    <button id="startBtn" class="bigBtn">📍 Use My Location</button>
+    <button id="manualBtn" class="bigBtn secondary">🌍 Manual Select</button>
+    <button id="mapSelectBtn" class="bigBtn secondary">🗺️ Pick From Map</button>
 
-  <div id="weatherBox">
-    <div>🌡️ <span id="temp"></span></div>
-    <div>🤗 <span id="feels"></span></div>
-    <div>☀️ <span id="uv"></span></div>
-    <div>💨 <span id="wind"></span></div>
-    <div>💧 <span id="hum"></span></div>
-    <div>👁️ <span id="vis"></span></div>
   </div>
 
-  <div id="map"></div>
+  <div id="status">Choose a mode</div>
+
+  <div id="manualBox" class="hidden">
+    <select id="countrySelect"></select>
+    <button id="loadManual" class="bigBtn">Load Weather</button>
+  </div>
+
+  <div id="loader" class="hidden"></div>
+
+  <div id="mainCard" class="glass hidden">
+    <div id="bigTemp">--°</div>
+    <div id="conditionText">--</div>
+  </div>
+
+  <div id="cards" class="grid hidden">
+
+    <div class="card">🌡️ Temp: <span id="temp"></span></div>
+    <div class="card">🤗 Feels: <span id="feels"></span></div>
+    <div class="card">☀️ UV: <span id="uv"></span></div>
+    <div class="card">💨 Wind: <span id="wind"></span></div>
+    <div class="card">💧 Humidity: <span id="hum"></span></div>
+    <div class="card">👁️ Visibility: <span id="vis"></span></div>
+
+    <div class="card wide" id="sun"></div>
+
+  </div>
+
+  <!-- MAP SCREEN -->
+  <div id="mapScreen" class="hidden">
+
+    <div id="mapControls" class="mapControls">
+
+      <button id="mapExpand">⤢ Expand</button>
+      <button id="mapMinimise" class="hidden">⤡ Minimise</button>
+      <button id="mapExit">✕ Exit</button>
+
+    </div>
+
+    <div id="mapContainer" class="mapBox">
+      <div id="map"></div>
+    </div>
+
+  </div>
 
 </div>
 
